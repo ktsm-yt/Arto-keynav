@@ -7,7 +7,7 @@
     "$schema": {
       "description": "The JSON Schema editors validate this file against.",
       "$ref": "#/$defs/SchemaUrl",
-      "default": "https://raw.githubusercontent.com/arto-app/Arto/main/schemas/config.schema.json"
+      "default": "https://raw.githubusercontent.com/ktsm-yt/Arto-keynav/main/schemas/config.schema.json"
     },
     "directory": {
       "$ref": "#/$defs/DirectoryConfig",

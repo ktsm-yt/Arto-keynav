@@ -230,7 +230,7 @@ fn init_tracing() {
     // On macOS, log to Console.app via oslog
     #[cfg(target_os = "macos")]
     let registry = registry.with(tracing_oslog::OsLogger::new(
-        "com.lambdalisue.Arto",
+        "io.github.ktsm-yt.artokeynav",
         "default",
     ));
 

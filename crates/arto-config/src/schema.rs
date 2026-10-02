@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// file outlives the version that wrote it, and a tag would keep describing
 /// that old version after every upgrade.
 pub const SCHEMA_URL: &str =
-    "https://raw.githubusercontent.com/arto-app/Arto/main/schemas/config.schema.json";
+    "https://raw.githubusercontent.com/ktsm-yt/Arto-keynav/main/schemas/config.schema.json";
 
 // A file without one gets `SCHEMA_URL`, so the first save gives the file its
 // schema; a file naming another is kept as written, so saving from the

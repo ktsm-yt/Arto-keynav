@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
-  <key>CFBundleDisplayName</key><string>Arto</string>
+  <key>CFBundleDisplayName</key><string>Arto Keynav</string>
   <key>CFBundleExecutable</key><string>arto</string>
-  <key>CFBundleIdentifier</key><string>com.lambdalisue.Arto</string>
+  <key>CFBundleIdentifier</key><string>io.github.ktsm-yt.artokeynav</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>Arto</string>
+  <key>CFBundleName</key><string>Arto Keynav</string>
   <key>CFBundleIconFile</key><string>Arto</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <!-- Placeholder; the real version is stamped from Cargo.toml at bundle time

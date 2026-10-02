@@ -57,12 +57,12 @@ impl From<ThemeArg> for arto_config::Theme {
     }
 }
 
-/// Arto — the Art of Reading Markdown
+/// Arto Keynav — keyboard navigation for Markdown
 #[derive(Parser, Debug)]
 #[command(
     version = VERSION,
     about,
-    long_about = "Arto — the Art of Reading Markdown\n\n\
+    long_about = "Arto Keynav — keyboard navigation for Markdown\n\n\
         A local app that faithfully recreates GitHub-style Markdown rendering\n\
         for a beautiful reading experience.\n\n\
         Arto runs as a single instance — if already running, paths are sent\n\

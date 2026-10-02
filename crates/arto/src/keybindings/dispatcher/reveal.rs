@@ -19,7 +19,7 @@ pub(super) fn scroll_cursor_into_view() {
 /// edge with nothing ahead of it. The row is kept a couple of rows clear of
 /// both ends instead — what is coming next is as much of an answer as where
 /// the cursor is.
-pub(super) fn scroll_into_view(selector: &'static str) {
+pub(crate) fn scroll_into_view(selector: &'static str) {
     spawn_detached(async move {
         let js = format!(
             r#"

@@ -262,7 +262,7 @@ pub fn rebase(highlights: &mut [Highlight], id: &HighlightId, start: u32, line: 
 /// The store the app uses, or `None` where the system names no data
 /// directory.
 static STORE: LazyLock<Option<Store>> = LazyLock::new(|| {
-    dirs::data_local_dir().map(|dir| Store::new(dir.join("arto").join("highlights")))
+    dirs::data_local_dir().map(|dir| Store::new(dir.join("arto-keynav").join("highlights")))
 });
 
 /// Broadcast when a document's highlights change, with the document.

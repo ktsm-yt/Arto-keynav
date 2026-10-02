@@ -5,6 +5,7 @@ mod listeners;
 mod mouse_navigation;
 mod ready_reporter;
 mod shortcut_overlay;
+mod zoom_gestures;
 
 use dioxus::desktop::tao::dpi::{LogicalPosition, LogicalSize};
 use dioxus::desktop::tao::event::{Event as TaoEvent, WindowEvent};
@@ -144,6 +145,7 @@ pub fn App(
 
     // The mouse's side buttons, which reach the history through the page.
     setup_mouse_navigation(state);
+    zoom_gestures::setup_zoom_gestures(state);
 
     // Handle menu events (only state-dependent events, not global ones)
     #[cfg(target_os = "macos")]
@@ -199,6 +201,16 @@ pub fn App(
     setup_ready_reporter();
 
     // Keep the window title on the document being read
+    let current_file = use_memo(move || state.current_file());
+    use_effect(move || {
+        if let Some(file) = current_file() {
+            state.reveal_in_roots(&file);
+            crate::keybindings::dispatcher::scroll_into_view(
+                ".left-sidebar-tree-node.reading-current",
+            );
+        }
+    });
+
     use_effect(move || {
         let title =
             crate::utils::window_title::generate_window_title(&state.document.read().content);

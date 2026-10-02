@@ -128,14 +128,14 @@ impl PersistedState {
     pub fn path() -> PathBuf {
         const FILENAME: &str = "state.json";
         if let Some(mut path) = dirs::data_local_dir() {
-            path.push("arto");
+            path.push("arto-keynav");
             path.push(FILENAME);
             return path;
         }
 
         // Fallback to home directory
         if let Some(mut path) = dirs::home_dir() {
-            path.push(".arto");
+            path.push(".arto-keynav");
             path.push(FILENAME);
             return path;
         }

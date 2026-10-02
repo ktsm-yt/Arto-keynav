@@ -18,14 +18,14 @@ pub fn AppearanceTab(config: Signal<Config>) -> Element {
         div {
             class: "preferences-pane",
 
-            h3 { class: "preference-section-title", "Mode" }
+            h3 { class: "preference-section-title", "モード" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Default Theme" }
-                    p { class: "preference-description", "Whether to paint the light theme, the dark theme, or the one the system asks for." }
+                    label { "既定のテーマ" }
+                    p { class: "preference-description", "ライト、ダーク、またはシステム設定に合わせたテーマを選びます。" }
                 }
                 OptionCards {
                     name: "theme-default".to_string(),
@@ -33,19 +33,19 @@ pub fn AppearanceTab(config: Signal<Config>) -> Element {
                         OptionCardItem {
                             value: Theme::Auto,
                             icon: Some(IconName::SunMoon),
-                            title: "Auto".to_string(),
+                            title: "自動".to_string(),
                             description: None,
                         },
                         OptionCardItem {
                             value: Theme::Light,
                             icon: Some(IconName::Sun),
-                            title: "Light".to_string(),
+                            title: "ライト".to_string(),
                             description: None,
                         },
                         OptionCardItem {
                             value: Theme::Dark,
                             icon: Some(IconName::Moon),
-                            title: "Dark".to_string(),
+                            title: "ダーク".to_string(),
                             description: None,
                         },
                     ],
@@ -57,14 +57,14 @@ pub fn AppearanceTab(config: Signal<Config>) -> Element {
                 }
             }
 
-            h3 { class: "preference-section-title", "Themes" }
+            h3 { class: "preference-section-title", "テーマ" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Light Theme" }
-                    p { class: "preference-description", "Which of GitHub's themes to paint in light mode." }
+                    label { "ライトテーマ" }
+                    p { class: "preference-description", "ライトモードで使うGitHubテーマを選びます。" }
                 }
                 ThemePicker {
                     name: "theme-light".to_string(),
@@ -82,8 +82,8 @@ pub fn AppearanceTab(config: Signal<Config>) -> Element {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Dark Theme" }
-                    p { class: "preference-description", "Which of GitHub's themes to paint in dark mode. A light theme is a valid choice here." }
+                    label { "ダークテーマ" }
+                    p { class: "preference-description", "ダークモードで使うGitHubテーマを選びます。ライトテーマも選択できます。" }
                 }
                 ThemePicker {
                     name: "theme-dark".to_string(),

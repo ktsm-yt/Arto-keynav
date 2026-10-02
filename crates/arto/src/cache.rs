@@ -42,16 +42,16 @@ pub fn clear_stale_webview_cache_if_needed() {
 // Build ID persistence
 // ---------------------------------------------------------------------------
 
-/// Path: ~/Library/Application Support/arto/.build-id
+/// Path: ~/Library/Application Support/arto-keynav/.build-id
 fn build_id_path() -> PathBuf {
     const FILENAME: &str = ".build-id";
     if let Some(mut path) = dirs::config_dir() {
-        path.push("arto");
+        path.push("arto-keynav");
         path.push(FILENAME);
         return path;
     }
     if let Some(mut path) = dirs::home_dir() {
-        path.push(".arto");
+        path.push(".arto-keynav");
         path.push(FILENAME);
         return path;
     }
@@ -104,8 +104,8 @@ fn collect_webview_cache_dirs() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
     // macOS: ~/Library/Caches/
     if let Some(cache_dir) = dirs::cache_dir() {
-        dirs.push(cache_dir.join("com.lambdalisue.Arto"));
-        dirs.push(cache_dir.join("arto"));
+        dirs.push(cache_dir.join("io.github.ktsm-yt.artokeynav"));
+        dirs.push(cache_dir.join("arto-keynav"));
     }
     dirs
 }
@@ -130,6 +130,11 @@ mod tests {
         if dirs.is_empty() {
             return;
         }
-        assert!(dirs.iter().any(|d| d.ends_with("com.lambdalisue.Arto")));
+        assert!(dirs
+            .iter()
+            .any(|d| d.ends_with("io.github.ktsm-yt.artokeynav")));
+        assert!(dirs
+            .iter()
+            .all(|d| { !d.ends_with("com.lambdalisue.Arto") && !d.ends_with("arto") }));
     }
 }

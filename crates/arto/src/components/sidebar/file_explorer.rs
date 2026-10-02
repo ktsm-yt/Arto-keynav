@@ -484,6 +484,12 @@ fn FileTreeNode(
     }
 
     let is_active = state.current_file().as_deref() == Some(path.as_path());
+    let is_reading_current = is_active
+        && state
+            .panel_cursor
+            .read()
+            .as_ref()
+            .is_some_and(|(at_group, at)| *at_group == group && at == &path);
 
     let is_keyboard_focused = panel_cursor_on(&state, group, &path);
 
@@ -512,6 +518,7 @@ fn FileTreeNode(
         div {
             class: "left-sidebar-tree-node",
             class: if is_active { "active" },
+            class: if is_reading_current { "reading-current" },
             class: if is_keyboard_focused { "keyboard-focused" },
 
             // Full-row clickable design:
@@ -531,6 +538,7 @@ fn FileTreeNode(
                         if is_dir {
                             state.toggle_directory_expansion(group, &root, &path);
                         } else {
+                            state.panel_cursor.set(Some((group, path.clone())));
                             state.open_from_panel(&path);
                         }
                     }
@@ -590,6 +598,7 @@ fn FileTreeNode(
                             let path = path.clone();
                             move |evt| {
                                 evt.stop_propagation();
+                                state.panel_cursor.set(Some((group, path.clone())));
                                 state.open_from_panel(&path);
                             }
                         },

@@ -39,7 +39,7 @@ const OPEN_FILE: &str = "open.json";
 /// The store the app uses, or `None` where the system names no data
 /// directory.
 pub(crate) static STORE: LazyLock<Option<Store>> = LazyLock::new(|| {
-    dirs::data_local_dir().map(|dir| Store::new(dir.join("arto").join("lenses"), MAX_BYTES))
+    dirs::data_local_dir().map(|dir| Store::new(dir.join("arto-keynav").join("lenses"), MAX_BYTES))
 });
 
 /// A lens a document had open, and whether its answer was shown.

@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 /// The service the keys are filed under in the credential store.
-const SERVICE: &str = "Arto lens API key";
+const SERVICE: &str = "Arto Keynav lens API key";
 
 static KEPT: LazyLock<Mutex<HashMap<String, Option<String>>>> =
     LazyLock::new(|| Mutex::new(HashMap::new()));

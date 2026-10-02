@@ -4,8 +4,8 @@ Preferences live in `config.json` in the app config directory:
 
 | Platform | Location |
 | --- | --- |
-| macOS | `~/Library/Application Support/arto/config.json` |
-| Linux | `~/.config/arto/config.json` (or `$XDG_CONFIG_HOME/arto/`) |
+| macOS | `~/Library/Application Support/arto-keynav/config.json` |
+| Linux | `~/.config/arto-keynav/config.json` (or `$XDG_CONFIG_HOME/arto-keynav/`) |
 | Windows | `%APPDATA%\arto\config.json` |
 
 The Preferences window writes this file, and it can be edited by hand as
@@ -78,7 +78,7 @@ The file names its JSON Schema on its first line:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/arto-app/Arto/main/schemas/config.schema.json"
+  "$schema": "https://raw.githubusercontent.com/ktsm-yt/Arto-keynav/main/schemas/config.schema.json"
 }
 ```
 

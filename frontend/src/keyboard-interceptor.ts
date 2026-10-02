@@ -219,6 +219,11 @@ function handleKeydown(e: KeyboardEvent): void {
   // dispatches them, so forwarding to the engine would double-fire.
   if (menuAccelerators.has(canonicalChord(e.code, modifiers))) return;
 
+  // Reading arrows belong to the app; native scrolling would also move the page.
+  if (!field && modifiers === 0 && (key === "ArrowUp" || key === "ArrowDown")) {
+    e.preventDefault();
+  }
+
   if (!isKeyboardMode) {
     isKeyboardMode = true;
     mouseAnchorX = lastMouseX;

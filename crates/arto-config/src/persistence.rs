@@ -1,8 +1,8 @@
 //! Where the configuration files live and how they are read and written.
 //!
 //! Preferences are `config.json`; keybindings are `mappings.json` next to it.
-//! Both sit in the platform configuration directory under `arto/`, falling
-//! back to `~/.arto/` when the platform directory is unknown.
+//! Both sit in the platform configuration directory under `arto-keynav/`, falling
+//! back to `~/.arto-keynav/` when the platform directory is unknown.
 
 use crate::Config;
 use arto_keybindings::BindingSet;
@@ -132,16 +132,16 @@ impl Config {
     }
 }
 
-/// `<platform config dir>/arto/<name>`, or `~/.arto/<name>` when the platform
+/// `<platform config dir>/arto-keynav/<name>`, or `~/.arto-keynav/<name>` when the platform
 /// has no configuration directory, or just `<name>` as a last resort.
 fn config_file(name: &str) -> PathBuf {
     if let Some(mut path) = dirs::config_dir() {
-        path.push("arto");
+        path.push("arto-keynav");
         path.push(name);
         return path;
     }
     if let Some(mut path) = dirs::home_dir() {
-        path.push(".arto");
+        path.push(".arto-keynav");
         path.push(name);
         return path;
     }
@@ -187,6 +187,17 @@ fn resolve_keybindings(mappings: Option<BindingSet>) -> BindingSet {
 mod tests {
     use super::*;
     use arto_keybindings::KeyAction;
+
+    #[test]
+    fn preferences_and_mappings_use_the_fork_directory() {
+        let config = Config::path();
+        let mappings = Config::mappings_path();
+        assert_eq!(config.parent(), mappings.parent());
+        if let Some(base) = dirs::config_dir() {
+            assert_eq!(config, base.join("arto-keynav").join("config.json"));
+            assert_ne!(config, base.join("arto").join("config.json"));
+        }
+    }
 
     #[test]
     fn resolve_keybindings_uses_mappings_when_present() {

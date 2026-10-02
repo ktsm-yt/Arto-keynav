@@ -41,15 +41,15 @@ impl PreferencesTab {
 
     fn title(self) -> &'static str {
         match self {
-            Self::Appearance => "Appearance",
+            Self::Appearance => "外観",
             Self::Markdown => "Markdown",
-            Self::Reading => "Reading",
-            Self::Panel => "Panel",
-            Self::Window => "Window",
-            Self::Startup => "Startup",
-            Self::Keybindings => "Keybindings",
-            Self::Lenses => "Lenses",
-            Self::About => "About",
+            Self::Reading => "閲覧",
+            Self::Panel => "サイドバー",
+            Self::Window => "ウィンドウ",
+            Self::Startup => "起動時",
+            Self::Keybindings => "キーバインド",
+            Self::Lenses => "レンズ",
+            Self::About => "このアプリについて",
         }
     }
 
@@ -216,7 +216,7 @@ pub fn PreferencesView(snapshot: PreferencesSnapshot) -> Element {
                 nav {
                     class: "preferences-nav",
                     role: "tablist",
-                    "aria-label": "Preferences sections",
+                    "aria-label": "設定項目",
 
                     for tab in PreferencesTab::ALL {
                         button {

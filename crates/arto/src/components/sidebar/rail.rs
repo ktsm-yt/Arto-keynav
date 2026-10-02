@@ -87,7 +87,7 @@ pub fn Rail(on_peek: EventHandler<Face>) -> Element {
             // peeks nothing: the panel it would show is not this panel.
             RailButton {
                 icon: IconName::Gear,
-                label: "Settings",
+                label: "設定",
                 active: false,
                 held: false,
                 on_click: move |_| state.open_preferences(),
@@ -147,6 +147,9 @@ fn RailButton(
     on_click: EventHandler<()>,
     on_dwell: EventHandler<()>,
 ) -> Element {
+    let state = use_context::<AppState>();
+    let zoom = state.sidebar.read().zoom_level;
+
     rsx! {
         button {
             class: "left-rail-button",
@@ -163,7 +166,7 @@ fn RailButton(
                 evt.stop_propagation();
                 on_dwell.call(());
             },
-            Icon { name: icon }
+            Icon { name: icon, size: (14.0 * zoom).round() as u32 }
         }
     }
 }

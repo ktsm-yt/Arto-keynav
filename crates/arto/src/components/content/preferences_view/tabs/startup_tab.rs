@@ -18,94 +18,94 @@ pub fn StartupTab(config: Signal<Config>) -> Element {
         div {
             class: "preferences-pane",
 
-            h3 { class: "preference-section-title", "When Arto Starts" }
+            h3 { class: "preference-section-title", "Artoの起動時" }
 
             p {
                 class: "preference-lede",
-                "The first window of a session opens with the defaults, or picks up where the last window that closed left off."
+                "最初のウィンドウを既定値で開くか、最後に閉じたウィンドウの状態を引き継ぐかを選びます。"
             }
 
             OnStartupRow {
                 name: "startup-theme",
-                label: "Theme",
+                label: "テーマ",
                 selected: cfg.theme.on_startup,
                 on_change: move |value| config.write().theme.on_startup = value,
                 shipped: Some(defaults.theme.on_startup),
             }
             OnStartupRow {
                 name: "startup-window-size",
-                label: "Window size",
+                label: "ウィンドウサイズ",
                 selected: cfg.window_size.on_startup,
                 on_change: move |value| config.write().window_size.on_startup = value,
                 shipped: Some(defaults.window_size.on_startup),
             }
             OnStartupRow {
                 name: "startup-window-position",
-                label: "Window position",
+                label: "ウィンドウ位置",
                 selected: cfg.window_position.on_startup,
                 on_change: move |value| config.write().window_position.on_startup = value,
                 shipped: Some(defaults.window_position.on_startup),
             }
             OnStartupRow {
                 name: "startup-zoom",
-                label: "Zoom level",
+                label: "拡大率",
                 selected: cfg.zoom.on_startup,
                 on_change: move |value| config.write().zoom.on_startup = value,
                 shipped: Some(defaults.zoom.on_startup),
             }
             OnStartupRow {
                 name: "startup-panel",
-                label: "Panel",
+                label: "サイドバー",
                 selected: cfg.sidebar.on_startup,
                 on_change: move |value| config.write().sidebar.on_startup = value,
                 shipped: Some(defaults.sidebar.on_startup),
             }
             OnStartupRow {
                 name: "startup-folder",
-                label: "Folder",
+                label: "フォルダ",
                 selected: cfg.directory.on_startup,
                 on_change: move |value| config.write().directory.on_startup = value,
                 shipped: Some(defaults.directory.on_startup),
             }
 
-            h3 { class: "preference-section-title", "When a Window Opens" }
+            h3 { class: "preference-section-title", "新しいウィンドウを開くとき" }
 
             p {
                 class: "preference-lede",
-                "A second window opens with the defaults, or matching the window it was opened from. Which folders it starts with is not a setting: ⌘N carries the places alone, ⇧⌘N the current window's folders as well."
+                "新しいウィンドウを既定値で開くか、開いた元のウィンドウの状態を引き継ぐかを選びます。"
             }
 
             OnNewWindowRow {
                 name: "new-window-theme",
-                label: "Theme",
+                label: "テーマ",
                 selected: cfg.theme.on_new_window,
                 on_change: move |value| config.write().theme.on_new_window = value,
                 shipped: Some(defaults.theme.on_new_window),
             }
             OnNewWindowRow {
                 name: "new-window-size",
-                label: "Window size",
+                label: "ウィンドウサイズ",
                 selected: cfg.window_size.on_new_window,
                 on_change: move |value| config.write().window_size.on_new_window = value,
                 shipped: Some(defaults.window_size.on_new_window),
             }
             OnNewWindowRow {
                 name: "new-window-position",
-                label: "Window position",
+                label: "ウィンドウ位置",
                 selected: cfg.window_position.on_new_window,
                 on_change: move |value| config.write().window_position.on_new_window = value,
                 shipped: Some(defaults.window_position.on_new_window),
             }
             OnNewWindowRow {
                 name: "new-window-zoom",
-                label: "Zoom level",
+                label: "拡大率",
                 selected: cfg.zoom.on_new_window,
                 on_change: move |value| config.write().zoom.on_new_window = value,
                 shipped: Some(defaults.zoom.on_new_window),
             }
             OnNewWindowRow {
                 name: "new-window-panel",
-                label: "Panel",
+                label: "サイドバー",
                 selected: cfg.sidebar.on_new_window,
                 on_change: move |value| config.write().sidebar.on_new_window = value,
                 shipped: Some(defaults.sidebar.on_new_window),
@@ -129,11 +129,11 @@ fn OnStartupRow(
             options: vec![
                 ChoiceItem {
                     value: StartupBehavior::Default,
-                    label: "Default".to_string(),
+                    label: "既定値".to_string(),
                 },
                 ChoiceItem {
                     value: StartupBehavior::LastClosed,
-                    label: "Last closed".to_string(),
+                    label: "最後に閉じた状態".to_string(),
                 },
             ],
             selected,
@@ -158,11 +158,11 @@ fn OnNewWindowRow(
             options: vec![
                 ChoiceItem {
                     value: NewWindowBehavior::Default,
-                    label: "Default".to_string(),
+                    label: "既定値".to_string(),
                 },
                 ChoiceItem {
                     value: NewWindowBehavior::LastFocused,
-                    label: "Last focused".to_string(),
+                    label: "最後に操作した状態".to_string(),
                 },
             ],
             selected,

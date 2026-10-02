@@ -67,7 +67,7 @@ pub struct Bookmarks {
     pub items: Vec<Bookmark>,
 }
 
-/// `<platform data dir>/arto/<name>`, or `~/.arto/<name>` when the platform
+/// `<platform data dir>/arto-keynav/<name>`, or `~/.arto-keynav/<name>` when the platform
 /// has no data directory, or just `<name>` as a last resort.
 ///
 /// This is for what the app writes about itself — bookmarks, the visit
@@ -75,13 +75,13 @@ pub struct Bookmarks {
 /// which lives in the configuration directory instead.
 pub(crate) fn data_file(name: &str) -> PathBuf {
     if let Some(mut path) = dirs::data_local_dir() {
-        path.push("arto");
+        path.push("arto-keynav");
         path.push(name);
         return path;
     }
 
     if let Some(mut path) = dirs::home_dir() {
-        path.push(".arto");
+        path.push(".arto-keynav");
         path.push(name);
         return path;
     }
