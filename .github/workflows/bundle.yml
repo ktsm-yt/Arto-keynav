@@ -62,6 +62,6 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: arto-keynav-macos-arm64
-          path: target/dx/arto/bundle/**/Arto_Keynav_*.dmg
+          path: target/dx/arto/bundle/macos/macos/Arto_Keynav_*.dmg
           if-no-files-found: error
           retention-days: 14
