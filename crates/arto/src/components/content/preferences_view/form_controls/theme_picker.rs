@@ -26,7 +26,7 @@ pub fn ThemePicker(
 ) -> Element {
     let reset_to = shipped
         .filter(|shipped| shipped != &selected)
-        .map(|shipped| shipped.label().to_string());
+        .map(|shipped| theme_label(shipped).to_string());
 
     let (matching, others): (Vec<ColorTheme>, Vec<ColorTheme>) = ColorTheme::ALL
         .into_iter()
@@ -56,11 +56,11 @@ pub fn ThemePicker(
                 class: "theme-cards-toggle",
                 onclick: move |_| expanded.toggle(),
                 if showing_others {
-                    if dark_mode { "Hide light themes" } else { "Hide dark themes" }
+                    if dark_mode { "ライトテーマを隠す" } else { "ダークテーマを隠す" }
                 } else if dark_mode {
-                    "Show light themes too"
+                    "ライトテーマも表示"
                 } else {
-                    "Show dark themes too"
+                    "ダークテーマも表示"
                 }
             }
         }
@@ -113,7 +113,21 @@ fn ThemeCard(
                     }
                 }
             }
-            span { class: "option-card-title", "{theme.label()}" }
+            span { class: "option-card-title", "{theme_label(theme)}" }
         }
+    }
+}
+
+fn theme_label(theme: ColorTheme) -> &'static str {
+    match theme {
+        ColorTheme::Light => "ライト（既定）",
+        ColorTheme::LightHighContrast => "ライト（高コントラスト）",
+        ColorTheme::LightColorblind => "ライト（P型・D型色覚対応）",
+        ColorTheme::LightTritanopia => "ライト（T型色覚対応）",
+        ColorTheme::Dark => "ダーク（既定）",
+        ColorTheme::DarkDimmed => "ダーク（淡色）",
+        ColorTheme::DarkHighContrast => "ダーク（高コントラスト）",
+        ColorTheme::DarkColorblind => "ダーク（P型・D型色覚対応）",
+        ColorTheme::DarkTritanopia => "ダーク（T型色覚対応）",
     }
 }

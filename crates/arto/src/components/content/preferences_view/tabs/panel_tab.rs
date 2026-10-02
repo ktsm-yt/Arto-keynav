@@ -26,14 +26,14 @@ pub fn PanelTab(
         div {
             class: "preferences-pane",
 
-            h3 { class: "preference-section-title", "Current Settings" }
+            h3 { class: "preference-section-title", "現在の設定" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Current Zoom Level" }
-                    p { class: "preference-description", "The zoom level for the current window's panel." }
+                    label { "現在の拡大率" }
+                    p { class: "preference-description", "現在のウィンドウのサイドバー拡大率です。" }
                 }
                 SliderInput {
                     value: current_zoom(),
@@ -51,14 +51,14 @@ pub fn PanelTab(
                 }
             }
 
-            h3 { class: "preference-section-title", "Default Settings" }
+            h3 { class: "preference-section-title", "既定の設定" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Default Width" }
-                    p { class: "preference-description", "How wide the panel is when a window opens." }
+                    label { "既定の幅" }
+                    p { class: "preference-description", "ウィンドウを開くときのサイドバー幅です。" }
                 }
                 SliderInput {
                     value: sidebar_cfg.default_width,
@@ -78,8 +78,8 @@ pub fn PanelTab(
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Default Zoom Level" }
-                    p { class: "preference-description", "The zoom level the panel's contents are set at when a window opens." }
+                    label { "既定の拡大率" }
+                    p { class: "preference-description", "ウィンドウを開くときのサイドバー内容の拡大率です。" }
                 }
                 SliderInput {
                     value: sidebar_cfg.default_zoom_level,
@@ -97,31 +97,31 @@ pub fn PanelTab(
             }
 
             ToggleRow {
-                label: "Pinned by default".to_string(),
-                description: Some("Pinned, the panel takes its own width beside the document; unpinned, it comes over the page on hover and leaves again.".to_string()),
+                label: "既定で固定する".to_string(),
+                description: Some("固定するとサイドバーが本文の横に表示されます。解除するとホバー時に本文の上へ表示されます。".to_string()),
                 checked: sidebar_cfg.default_pinned,
                 on_change: move |on| config.write().sidebar.default_pinned = on,
                 shipped: Some(defaults.sidebar.default_pinned),
             }
 
             ToggleRow {
-                label: "Show every file".to_string(),
-                description: Some("Off, the tree lists Markdown alone.".to_string()),
+                label: "すべてのファイルを表示".to_string(),
+                description: Some("オフにすると、ツリーにはMarkdownファイルだけを表示します。".to_string()),
                 checked: sidebar_cfg.default_show_all_files,
                 on_change: move |on| config.write().sidebar.default_show_all_files = on,
                 shipped: Some(defaults.sidebar.default_show_all_files),
             }
 
-            h3 { class: "preference-section-title", "Behavior" }
+            h3 { class: "preference-section-title", "動作" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "After Opening a Document" }
+                    label { "ドキュメントを開いた後" }
                     p {
                         class: "preference-description",
-                        "What the panel does once a document has been opened from one of its rows. Some readers work down the list, opening one document after another; others go to it for one thing and want the page to themselves once they have it."
+                        "サイドバーの項目からドキュメントを開いた後の表示を選びます。"
                     }
                 }
                 OptionCards {
@@ -130,14 +130,14 @@ pub fn PanelTab(
                         OptionCardItem {
                             icon: None,
                             value: OpenFromPanel::KeepOpen,
-                            title: "Keep the panel".to_string(),
-                            description: Some("The list stays where it is".to_string()),
+                            title: "サイドバーを開いたままにする".to_string(),
+                            description: Some("一覧をそのまま表示します".to_string()),
                         },
                         OptionCardItem {
                             icon: None,
                             value: OpenFromPanel::ClosePanel,
-                            title: "Close the panel".to_string(),
-                            description: Some("The document is left alone on screen".to_string()),
+                            title: "サイドバーを閉じる".to_string(),
+                            description: Some("本文だけを表示します".to_string()),
                         },
                     ],
                     selected: sidebar_cfg.on_open,

@@ -34,7 +34,7 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
             class: "preferences-pane",
 
             // Preset cards
-            h3 { class: "preference-section-title", "Presets" }
+            h3 { class: "preference-section-title", "プリセット" }
             div {
                 class: "preset-cards",
                 button {
@@ -42,8 +42,8 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
                     onclick: move |_| {
                         config.write().keybindings = presets::default::bindings();
                     },
-                    span { class: "preset-card-name", "Default" }
-                    span { class: "preset-card-desc", "Arrow keys, Cmd+Key, Ctrl+Tab" }
+                    span { class: "preset-card-name", "既定値" }
+                    span { class: "preset-card-desc", "矢印キー、Cmd+キー、Ctrl+Tab" }
                 }
                 button {
                     class: "preset-card",
@@ -51,7 +51,7 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
                         config.write().keybindings = presets::vim::bindings();
                     },
                     span { class: "preset-card-name", "Vim" }
-                    span { class: "preset-card-desc", "j/k scroll, g g, chord sequences" }
+                    span { class: "preset-card-desc", "j/kでスクロール、g gなどのキー列" }
                 }
                 button {
                     class: "preset-card",
@@ -59,24 +59,24 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
                         config.write().keybindings = presets::emacs::bindings();
                     },
                     span { class: "preset-card-name", "Emacs" }
-                    span { class: "preset-card-desc", "Ctrl+n/p, Ctrl+x combos" }
+                    span { class: "preset-card-desc", "Ctrl+n/p、Ctrl+xの組み合わせ" }
                 }
                 button {
                     class: "preset-card",
                     onclick: move |_| {
                         config.write().keybindings = BindingSet::default();
                     },
-                    span { class: "preset-card-name", "Clear" }
-                    span { class: "preset-card-desc", "Remove all keybindings" }
+                    span { class: "preset-card-name", "クリア" }
+                    span { class: "preset-card-desc", "すべてのキーバインドを削除" }
                 }
             }
 
             // Binding sections grouped by context
-            h3 { class: "preference-section-title", "Bindings" }
+            h3 { class: "preference-section-title", "キーバインド" }
             input {
                 r#type: "text",
                 class: "binding-filter-input",
-                placeholder: "Filter by key or action...",
+                placeholder: "キーまたは操作で絞り込む...",
                 value: "{filter_text}",
                 oninput: move |evt| filter_text.set(evt.value()),
                 onkeydown: move |evt: KeyboardEvent| {
@@ -89,14 +89,14 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
             }
 
             BindingSection {
-                title: "Menu Shortcuts",
+                title: "メニューショートカット",
                 scope: BindingScope::Menu,
                 bindings: keybindings.menu_shortcuts.clone(),
                 filter_query: filter_text(),
                 config,
             }
             BindingSection {
-                title: "Global",
+                title: "共通",
                 scope: BindingScope::Engine(None),
                 bindings: keybindings.global.clone(),
                 filter_query: filter_text(),
@@ -105,7 +105,7 @@ pub fn KeybindingsTab(config: Signal<Config>) -> Element {
             for context in KeyContext::ALL {
                 BindingSection {
                     key: "{context}",
-                    title: context.label(),
+                    title: context_label(Some(context)),
                     scope: BindingScope::Engine(Some(context)),
                     bindings: keybindings.of(context).clone(),
                     filter_query: filter_text(),
@@ -206,7 +206,7 @@ fn BindingSection(
             h4 { class: "binding-section-title", "{title}" }
 
             if bindings.is_empty() && !*show_add_form.read() {
-                p { class: "binding-empty", "No bindings defined yet." }
+                p { class: "binding-empty", "キーバインドはまだありません。" }
             }
 
             if !bindings.is_empty() {
@@ -218,7 +218,7 @@ fn BindingSection(
                                 th {
                                     class: "binding-header-key",
                                     onclick: move |_| toggle_sort(SortColumn::Key),
-                                    "Key"
+                                    "キー"
                                     if let Some(icon) = sort_icon(SortColumn::Key) {
                                         Icon { name: icon, size: 12 }
                                     }
@@ -226,7 +226,7 @@ fn BindingSection(
                                 th {
                                     class: "binding-header-action",
                                     onclick: move |_| toggle_sort(SortColumn::Action),
-                                    "Action"
+                                    "操作"
                                     if let Some(icon) = sort_icon(SortColumn::Action) {
                                         Icon { name: icon, size: 12 }
                                     }
@@ -278,7 +278,7 @@ fn BindingSection(
                         }
                     }
                 } else if !query_lower.is_empty() {
-                    p { class: "binding-empty", "No matching bindings." }
+                    p { class: "binding-empty", "一致するキーバインドはありません。" }
                 }
             }
 
@@ -296,7 +296,7 @@ fn BindingSection(
                 button {
                     class: "binding-add-btn",
                     onclick: move |_| show_add_form.set(true),
-                    "+ Add binding"
+                    "+ キーバインドを追加"
                 }
             }
         }
@@ -544,7 +544,7 @@ fn BindingForm(
                     input {
                         r#type: "text",
                         class: if *recording.read() { "key-recorder-text recording" } else { "key-recorder-text" },
-                        placeholder: if *recording.read() { "Press a key..." } else { "e.g. Cmd+k, g g" },
+                        placeholder: if *recording.read() { "キーを押してください..." } else { "例: Cmd+k、g g" },
                         value: "{key_input}",
                         readonly: *recording.read(),
                         oninput: move |evt| {
@@ -586,7 +586,7 @@ fn BindingForm(
                                 // Done: keep recorded value, stop recording
                                 recording.set(false);
                             },
-                            "Done"
+                            "完了"
                         }
                         button {
                             class: "key-record-btn",
@@ -597,7 +597,7 @@ fn BindingForm(
                                 recording_input_epoch.set(0);
                                 recording.set(false);
                             },
-                            "Cancel"
+                            "キャンセル"
                         }
                     } else {
                         button {
@@ -610,7 +610,7 @@ fn BindingForm(
                                 recording_input_epoch.set(0);
                                 recording.set(true);
                             },
-                            "Record"
+                            "記録"
                         }
                     }
                 }
@@ -624,7 +624,7 @@ fn BindingForm(
                         value: "",
                         disabled: true,
                         selected: selected_action_value.is_empty(),
-                        "Select action..."
+                        "操作を選択..."
                     }
                     // Menu shortcuts may only target menu-backed actions; engine
                     // bindings can target any action (grouped by category).
@@ -646,7 +646,7 @@ fn BindingForm(
                     } else {
                         for (group_label, actions) in ACTION_GROUPS {
                             optgroup {
-                                label: *group_label,
+                                label: action_group_label(group_label),
                                 for action in *actions {
                                     {
                                         let action_value = action.to_string();
@@ -703,7 +703,7 @@ fn BindingForm(
                         drop(cfg);
                         on_close.call(());
                     },
-                    if is_edit { "Save" } else { "Add" }
+                    if is_edit { "保存" } else { "追加" }
                 }
                 button {
                     class: "binding-form-cancel",
@@ -711,7 +711,7 @@ fn BindingForm(
                         recording.set(false);
                         on_close.call(());
                     },
-                    "Cancel"
+                    "キャンセル"
                 }
                 // Delete button (edit mode only), pushed to the right
                 if is_edit {
@@ -728,7 +728,7 @@ fn BindingForm(
                                 on_close.call(());
                             }
                         },
-                        "Delete"
+                        "削除"
                     }
                 }
             }
@@ -761,7 +761,7 @@ fn check_menu_conflict(
 ) -> Option<BindingNotice> {
     if accelerator_for_key(new_key).is_none() {
         return Some(BindingNotice::Conflict(
-            "Menu shortcuts must be a single chord (e.g. Cmd+K)".to_string(),
+            "メニューショートカットは単一のキー操作にしてください（例: Cmd+K）".to_string(),
         ));
     }
 
@@ -775,7 +775,7 @@ fn check_menu_conflict(
             .unwrap_or_default();
         if existing == new_seq {
             return Some(BindingNotice::Conflict(format!(
-                "Conflicts with \"{}\" (Menu Shortcuts)",
+                "「{}」と競合しています（メニューショートカット）",
                 action_label(&ka.action)
             )));
         }
@@ -801,38 +801,189 @@ fn cross_scope_conflict(
             .unwrap_or_default();
         if existing == new_seq {
             return Some(BindingNotice::Conflict(format!(
-                "Also bound as \"{}\" ({other_label}) — one will shadow the other",
-                action_label(&ka.action)
+                "「{}」（{}）にも割り当てられています。どちらか一方が優先されます。",
+                action_label(&ka.action),
+                other_label
             )));
         }
     }
     None
 }
 
-/// Convert an action string like "scroll.down" to a human-readable label "Scroll Down".
 fn action_label(action_str: &str) -> String {
+    let common = match action_str {
+        "window.new_document" => Some("新しいドキュメントを開く"),
+        "cursor.open" => Some("選択項目を開く"),
+        "cursor.collapse" => Some("フォルダを畳む"),
+        "cursor.enter" => Some("選択項目を決定"),
+        "cursor.down" => Some("カーソルを下へ移動"),
+        "cursor.up" => Some("カーソルを上へ移動"),
+        "file.next" => Some("次の記事"),
+        "file.previous" => Some("前の記事"),
+        "file.open" => Some("ファイルを開く"),
+        "file.open_directory" => Some("フォルダを開く"),
+        "window.toggle_sidebar" => Some("サイドバーを表示・非表示"),
+        "window.close" => Some("ウィンドウを閉じる"),
+        "window.new" => Some("新しいウィンドウを開く"),
+        "content.next" => Some("次の本文要素"),
+        "content.prev" => Some("前の本文要素"),
+        "content.next_heading" => Some("次の見出し"),
+        "content.prev_heading" => Some("前の見出し"),
+        "content.open_viewer" => Some("ビューアで開く"),
+        _ => None,
+    };
+    if let Some(label) = common {
+        return label.to_string();
+    }
+
     action_str
         .split('.')
         .flat_map(|part| part.split('_'))
-        .map(|word| {
-            let mut chars = word.chars();
-            match chars.next() {
-                None => String::new(),
-                Some(c) => {
-                    let upper: String = c.to_uppercase().collect();
-                    upper + chars.as_str()
-                }
-            }
-        })
+        .map(action_word_label)
         .collect::<Vec<_>>()
         .join(" ")
+}
+
+fn action_word_label(word: &str) -> &str {
+    match word {
+        "scroll" => "スクロール",
+        "down" => "下へ",
+        "up" => "上へ",
+        "page" => "ページ",
+        "half" => "半分",
+        "top" => "先頭",
+        "bottom" => "末尾",
+        "history" => "履歴",
+        "back" => "戻る",
+        "forward" => "進む",
+        "search" => "検索",
+        "open" => "開く",
+        "next" => "次へ",
+        "prev" | "previous" => "前へ",
+        "clear" => "クリア",
+        "pin" => "固定",
+        "current" => "現在",
+        "highlight" => "ハイライト",
+        "add" => "追加",
+        "remove" => "削除",
+        "note" => "メモ",
+        "zoom" => "拡大率",
+        "in" => "拡大",
+        "out" => "縮小",
+        "reset" => "リセット",
+        "clipboard" => "クリップボード",
+        "copy" => "コピー",
+        "file" => "ファイル",
+        "path" => "パス",
+        "with" => "付き",
+        "line" => "行",
+        "range" => "範囲",
+        "as" => "として",
+        "markdown" => "Markdown",
+        "code" => "コード",
+        "table" => "表",
+        "tsv" => "TSV",
+        "csv" => "CSV",
+        "image" => "画像",
+        "background" => "背景",
+        "link" => "リンク",
+        "window" => "ウィンドウ",
+        "new" => "新規",
+        "duplicate" => "複製",
+        "document" => "ドキュメント",
+        "close" => "閉じる",
+        "all" => "すべて",
+        "child" => "子",
+        "windows" => "ウィンドウ",
+        "toggle" => "切替",
+        "sidebar" => "サイドバー",
+        "focus" => "フォーカス",
+        "mode" => "モード",
+        "reload" => "再読み込み",
+        "places" => "場所",
+        "starred" => "スター付き",
+        "recent" => "最近開いた項目",
+        "links" => "リンク",
+        "set" => "設定",
+        "parent" => "親フォルダ",
+        "bookmark" => "ブックマーク",
+        "preview" => "プレビュー",
+        "save" => "保存",
+        "preferences" => "設定",
+        "reveal" => "Finderで表示",
+        "finder" => "Finder",
+        "print" => "プリント",
+        "app" => "アプリ",
+        "about" => "このアプリについて",
+        "quit" => "終了",
+        "go" => "移動",
+        "to" => "へ",
+        "homepage" => "ホームページ",
+        "help" => "ヘルプ",
+        "show" => "表示",
+        "keyboard" => "キーボード",
+        "shortcuts" => "ショートカット",
+        "palette" => "コマンドパレット",
+        "confirm" => "決定",
+        "contents" => "目次",
+        "changes" => "変更",
+        "mark" => "マーク",
+        "read" => "既読",
+        "lens" | "lenses" => "レンズ",
+        "stop" => "停止",
+        "hide" => "隠す",
+        "face" => "表示",
+        "theme" => "テーマ",
+        "light" => "ライト",
+        "dark" => "ダーク",
+        "auto" => "自動",
+        "cursor" => "カーソル",
+        "enter" => "決定",
+        "collapse" => "折りたたむ",
+        "content" => "本文",
+        "heading" => "見出し",
+        "viewer" => "ビューア",
+        "directory" => "フォルダ",
+        "cancel" => "キャンセル",
+        _ => word,
+    }
+}
+
+fn action_group_label(group: &str) -> &str {
+    match group {
+        "Scroll" => "スクロール",
+        "History" => "履歴",
+        "Search" => "検索",
+        "Highlights" => "ハイライト",
+        "Zoom" => "拡大率",
+        "Clipboard" => "クリップボード",
+        "Window" => "ウィンドウ",
+        "Focus" => "フォーカス",
+        "File" => "ファイル",
+        "App" => "アプリ",
+        "Palette" => "コマンドパレット",
+        "Contents" => "目次",
+        "Changes" => "変更",
+        "Lenses" => "レンズ",
+        "Sidebar" => "サイドバー",
+        "Theme" => "テーマ",
+        "Cursor" => "カーソル",
+        "Content" => "本文",
+        "Directory" => "フォルダ",
+        "Cancel" => "キャンセル",
+        _ => group,
+    }
 }
 
 /// Human-readable label for a context.
 fn context_label(context: Option<KeyContext>) -> &'static str {
     match context {
-        None => "Global",
-        Some(context) => context.label(),
+        None => "共通",
+        Some(KeyContext::Content) => "本文",
+        Some(KeyContext::Sidebar) => "サイドバー",
+        Some(KeyContext::Search) => "検索",
+        Some(KeyContext::Palette) => "コマンドパレット",
+        Some(KeyContext::Contents) => "目次",
     }
 }
 
@@ -913,7 +1064,7 @@ fn check_conflict_inner(
             // Same context (including both Global) → true conflict
             (None, None) | (Some(_), Some(_)) if binding.context == context => {
                 return Some(BindingNotice::Conflict(format!(
-                    "Conflicts with {action_desc}"
+                    "{action_desc} と競合しています"
                 )))
             }
             // New context binding overrides existing global
@@ -931,7 +1082,7 @@ fn check_conflict_inner(
 
     if let Some(desc) = overrides_global {
         return Some(BindingNotice::Overwrite(format!(
-            "Overrides {desc} in this context"
+            "このコンテキストでは {desc} を上書きします"
         )));
     }
 
@@ -939,7 +1090,7 @@ fn check_conflict_inner(
         overridden_by.sort();
         overridden_by.dedup();
         return Some(BindingNotice::Overwrite(format!(
-            "Will be overridden in: {}",
+            "次のコンテキストで上書きされます: {}",
             overridden_by.join(", ")
         )));
     }
@@ -955,19 +1106,22 @@ mod tests {
 
     #[test]
     fn action_label_converts_dot_and_underscore() {
-        assert_eq!(action_label("scroll.down"), "Scroll Down");
-        assert_eq!(action_label("window.new_document"), "Window New Document");
-        assert_eq!(action_label("cancel"), "Cancel");
+        assert_eq!(action_label("scroll.down"), "スクロール 下へ");
+        assert_eq!(
+            action_label("window.new_document"),
+            "新しいドキュメントを開く"
+        );
+        assert_eq!(action_label("cancel"), "キャンセル");
         assert_eq!(
             action_label("clipboard.copy_file_path"),
-            "Clipboard Copy File Path"
+            "クリップボード コピー ファイル パス"
         );
     }
 
     #[test]
     fn context_label_display() {
-        assert_eq!(context_label(None), "Global");
-        assert_eq!(context_label(Some(KeyContext::Content)), "Content");
+        assert_eq!(context_label(None), "共通");
+        assert_eq!(context_label(Some(KeyContext::Content)), "本文");
     }
 
     #[test]
@@ -1111,8 +1265,8 @@ mod tests {
         let result = check_conflict(&resolved, "j", None);
         match result {
             Some(BindingNotice::Overwrite(msg)) => {
-                assert!(msg.contains("Content"), "should list Content: {msg}");
-                assert!(msg.contains("Panel"), "should list Panel: {msg}");
+                assert!(msg.contains("本文"), "should list Content: {msg}");
+                assert!(msg.contains("サイドバー"), "should list Panel: {msg}");
             }
             other => panic!("Expected Overwrite, got {other:?}"),
         }

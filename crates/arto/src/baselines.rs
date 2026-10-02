@@ -43,7 +43,7 @@ const VERSION: u32 = 1;
 static STORE: LazyLock<Option<Store>> = LazyLock::new(|| {
     dirs::data_local_dir().map(|dir| {
         Store::new(
-            dir.join("arto").join("baselines"),
+            dir.join("arto-keynav").join("baselines"),
             MAX_BYTES,
             MAX_DOCUMENT_BYTES,
         )

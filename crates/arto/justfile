@@ -53,17 +53,15 @@ verify: fmt check test
 clean:
   cargo clean
 
-# The DMG is built AFTER the Quick Look extension is embedded, not by `dx
-# bundle` directly. `dx bundle --package-types dmg` seals the DMG from the app
-# during the same invocation, before `_embed-quicklook` mutates the app — so a
-# DMG produced that way never contains the extension (only a local `just
-# install`, which copies the mutated .app, would). Bundle the bare .app first,
-# embed the extension into it, then package the DMG from the embedded app.
+# Build the signed macOS app, then package it under the fork's distinct name.
+# Quick Look is omitted so the upstream preview provider can coexist.
 [macos]
 build:
   dx bundle --release --macos --package-types macos
   just _apply-bundle-metadata
-  just _embed-quicklook
+  # Keep the upstream Quick Look provider in charge when both apps are installed.
+  # dx derives its intermediate app name from the Cargo package, not application.name.
+  codesign --force --sign - --timestamp=none "{{target}}/dx/arto/release/macos/Arto.app"
   just _package-dmg
 
 # Deterministically install the canonical Info.plist and app icon, and stamp the
@@ -71,19 +69,22 @@ build:
 # apply the `[bundle]` icon or `[bundle.macos] info_plist_path` from Dioxus.toml
 # — a clean build otherwise ships an app with NO `.md`/`.txt` Finder
 # associations, a missing icon, and a version that ignores the release tag. This
-# runs before `_embed-quicklook`, whose final re-sign seals these edits.
+# runs before the final ad-hoc signature seals these edits.
 [macos]
 [private]
 _apply-bundle-metadata:
   #!/usr/bin/env bash
   set -euo pipefail
   app="{{target}}/dx/arto/release/macos/Arto.app"
-  version="$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")"
+  version="${ARTO_BUILD_VERSION:-$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")}"
   # Canonical Info.plist carries the file-type associations and high-DPI flag.
   cp "{{root}}/platform/macos/bundle/Info.plist" "$app/Contents/Info.plist"
   # Stamp the real version (CI patches Cargo.toml for releases; local stays 0.0.0).
   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${version}" \
     "$app/Contents/Info.plist"
+  cp "{{root}}/LICENSE" "$app/Contents/Resources/LICENSE"
+  # ponytail: notices match the locked beta dependencies; regenerate after dependency updates.
+  cp "{{root}}/THIRD-PARTY-NOTICES.txt" "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt"
   # The plist references CFBundleIconFile = Arto → the bundle needs Arto.icns.
   cp "{{root}}/platform/macos/bundle/Arto.icns" "$app/Contents/Resources/Arto.icns"
   echo "Applied canonical Info.plist (version ${version}) and app icon"
@@ -130,26 +131,15 @@ _embed-quicklook:
   codesign --force --sign - --timestamp=none "$app"
   echo "Quick Look preview extension embedded at Contents/PlugIns/ArtoQuickLook.appex"
 
-# Package the (already extension-embedded and signed) app bundle into a
-# compressed DMG. This replaces `dx bundle --package-types dmg` so the DMG is
-# built from the mutated app rather than sealed before `_embed-quicklook` runs.
-# The output path and filename mirror what `dx bundle` produced
-# (`bundle/macos/macos/Arto_<version>_<arch>.dmg`) so the CI upload glob
-# (`bundle/**/*.dmg`) and the Homebrew asset name (`Arto_<version>_aarch64.dmg`)
-# keep matching. `dx` names the arch `aarch64`, not `uname -m`'s `arm64`.
-#
-# Every stale DMG under the bundle dir is removed first: CI caches the
-# workspace `target/` (which contains `bundle/`) and the `build` job also runs
-# on non-release pushes, where the version stays `0.0.0`. Without this sweep a
-# cached `Arto_0.0.0_...dmg` would be restored on a later release build and the
-# `bundle/**/*.dmg` upload glob would attach it alongside the real release DMG.
+# Dioxus names its intermediate app from the Cargo package. The DMG carries
+# the fork's name instead. Remove only generated stale DMGs before packaging.
 [macos]
 [private]
 _package-dmg:
   #!/usr/bin/env bash
   set -euo pipefail
   app="{{target}}/dx/arto/release/macos/Arto.app"
-  version="$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")"
+  version="${ARTO_BUILD_VERSION:-$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")}"
   case "$(uname -m)" in
     arm64 | aarch64) arch="aarch64" ;;
     x86_64) arch="x86_64" ;;
@@ -157,18 +147,18 @@ _package-dmg:
   esac
   bundle="{{target}}/dx/arto/bundle"
   outdir="$bundle/macos/macos"
-  dmg="$outdir/Arto_${version}_${arch}.dmg"
+  dmg="$outdir/Arto_Keynav_${version}_${arch}.dmg"
   mkdir -p "$outdir"
   # Drop any stale DMG (including wrong-version ones from a restored cache) so
   # the release upload glob only ever sees the one we build here.
   find "$bundle" -type f -name '*.dmg' -delete
   staging="$(mktemp -d)"
   # `ditto` preserves the code signature and the nested extension bundle.
-  ditto "$app" "$staging/Arto.app"
+  ditto "$app" "$staging/Arto Keynav.app"
   ln -s /Applications "$staging/Applications"
-  hdiutil create -volname "Arto" -srcfolder "$staging" -format UDZO -ov "$dmg"
+  hdiutil create -volname "Arto Keynav" -srcfolder "$staging" -format UDZO -ov "$dmg"
   rm -rf "$staging"
-  echo "DMG with embedded Quick Look extension created at $dmg"
+  echo "Arto Keynav DMG created at $dmg"
 
 # Two Linux artifacts are produced from the same build: a .deb for
 # Debian/Ubuntu, and an AppImage for everything else. The AppImage is not a
@@ -193,7 +183,7 @@ build:
   # Only the .deb comes from dx. Its AppImage would carry WebKitGTK, which the
   # image must leave to the system, and dx offers no way to exclude a library
   # from the linuxdeploy run it drives.
-  version="$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")"
+  version="${ARTO_BUILD_VERSION:-$(perl -ne 'print $1 and exit if /^version = "(.*)"/' "{{root}}/Cargo.toml")}"
   case "$(uname -m)" in
     aarch64 | arm64) arch="aarch64" ;;
     *) arch="$(uname -m)" ;;
@@ -279,8 +269,7 @@ open:
 [confirm]
 [macos]
 install:
-  @rm -rf /Applications/Arto.app
-  @cp -af "{{target}}/dx/arto/release/macos/Arto.app" /Applications/.
+  @ditto "{{target}}/dx/arto/release/macos/Arto.app" "/Applications/Arto Keynav.app"
 
 [windows]
 build:

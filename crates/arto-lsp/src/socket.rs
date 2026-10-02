@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 /// File name of the socket (Unix) or suffix of the pipe name (Windows).
-pub const SOCKET_NAME: &str = "com.lambdalisue.arto.sock";
+pub const SOCKET_NAME: &str = "io.github.ktsm-yt.artokeynav.sock";
 
 /// Timeout for IPC operations (connection, read, write).
 pub const IPC_TIMEOUT: Duration = Duration::from_secs(5);
@@ -44,7 +44,7 @@ pub enum IpcError {
 
 /// The platform-specific socket path, isolated per user.
 ///
-/// - Unix: `$XDG_RUNTIME_DIR/<name>`, or `/tmp/arto-<uid>/<name>`
+/// - Unix: `$XDG_RUNTIME_DIR/<name>`, or `/tmp/arto-keynav-<uid>/<name>`
 /// - Windows: a named pipe carrying the user name
 #[cfg(unix)]
 pub fn socket_path() -> PathBuf {
@@ -56,7 +56,7 @@ pub fn socket_path() -> PathBuf {
     // Fallback to /tmp with user ID for isolation
     // SAFETY: getuid() is always safe to call
     let uid = unsafe { libc::getuid() };
-    PathBuf::from(format!("/tmp/arto-{uid}")).join(SOCKET_NAME)
+    PathBuf::from(format!("/tmp/arto-keynav-{uid}")).join(SOCKET_NAME)
 }
 
 #[cfg(windows)]
@@ -64,7 +64,10 @@ pub fn socket_path() -> PathBuf {
     // Windows named pipes are already isolated by session
     // Include username for additional safety
     let username = std::env::var("USERNAME").unwrap_or_else(|_| "user".to_string());
-    PathBuf::from(format!(r"\\.\pipe\arto-{}-{}", username, SOCKET_NAME))
+    PathBuf::from(format!(
+        r"\\.\pipe\arto-keynav-{}-{}",
+        username, SOCKET_NAME
+    ))
 }
 
 /// Check if an IO error indicates "address already in use".
@@ -261,6 +264,7 @@ mod tests {
     #[cfg(unix)]
     fn socket_path_is_user_isolated() {
         let path = socket_path();
+        assert_ne!(path.file_name().unwrap(), "com.lambdalisue.arto.sock");
 
         // Ensure the socket file name is exactly SOCKET_NAME
         let file_name = path
@@ -269,7 +273,7 @@ mod tests {
             .expect("Socket path should have a valid UTF-8 file name");
         assert_eq!(file_name, SOCKET_NAME);
 
-        // Either XDG_RUNTIME_DIR or /tmp/arto-{uid}/
+        // Either XDG_RUNTIME_DIR or /tmp/arto-keynav-{uid}/
         let parent = path
             .parent()
             .expect("Socket path should have a parent directory");
@@ -278,11 +282,11 @@ mod tests {
         let parent_matches_xdg = xdg_runtime_dir.as_deref().is_some_and(|xdg| parent == xdg);
 
         let parent_str = parent.to_string_lossy();
-        let parent_matches_tmp = parent_str.starts_with("/tmp/arto-");
+        let parent_matches_tmp = parent_str.starts_with("/tmp/arto-keynav-");
 
         assert!(
             parent_matches_xdg || parent_matches_tmp,
-            "Socket directory should be XDG_RUNTIME_DIR ({:?}) or start with '/tmp/arto-'; got {}",
+            "Socket directory should be XDG_RUNTIME_DIR ({:?}) or start with '/tmp/arto-keynav-'; got {}",
             xdg_runtime_dir,
             parent_str
         );

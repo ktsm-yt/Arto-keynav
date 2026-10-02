@@ -14,7 +14,7 @@ Understanding the relationship between Config, PersistedState, and State modules
 - Subsequent launches → Connect to primary, hand the request over, exit(0)
 - Primary instance receives paths via IPC server → Opens files/directories in existing windows
 
-**IPC Protocol:** Unix domain socket (`com.lambdalisue.arto.sock`) carrying JSON-RPC 2.0 in LSP `Content-Length` framing — see `lsp.md`
+**IPC Protocol:** Unix domain socket (`io.github.ktsm-yt.artokeynav.sock`) carrying JSON-RPC 2.0 in LSP `Content-Length` framing — see `lsp.md`
 
 **Why:** Prevents multiple processes from conflicting over file watches, config writes, and state persistence.
 

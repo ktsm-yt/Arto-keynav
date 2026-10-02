@@ -311,6 +311,37 @@ mod tests {
     }
 
     #[test]
+    fn arrows_open_files_in_content_and_move_cursor_in_sidebar() {
+        let mut engine = KeybindingEngine::new(&default_bindings());
+        assert_eq!(
+            engine.process_key(&chord("ArrowDown"), false, KeyContext::Content),
+            KeyMatchResult::Matched(Action::FileNext)
+        );
+        assert_eq!(
+            engine.process_key(&chord("ArrowUp"), false, KeyContext::Content),
+            KeyMatchResult::Matched(Action::FilePrevious)
+        );
+        assert_eq!(
+            engine.process_key(&chord("ArrowDown"), false, KeyContext::Sidebar),
+            KeyMatchResult::Matched(Action::CursorDown)
+        );
+        for context in [KeyContext::Content, KeyContext::Sidebar] {
+            assert_eq!(
+                engine.process_key(&chord("ArrowLeft"), false, context),
+                KeyMatchResult::Matched(Action::CursorCollapse)
+            );
+            assert_eq!(
+                engine.process_key(&chord("ArrowRight"), false, context),
+                KeyMatchResult::Matched(Action::CursorOpen)
+            );
+        }
+        assert_eq!(
+            engine.process_key(&chord("Enter"), false, KeyContext::Sidebar),
+            KeyMatchResult::Matched(Action::CursorOpen)
+        );
+    }
+
+    #[test]
     fn menu_shortcut_reachable_only_when_folded() {
         // The menu-shortcut folding decision, tested on both branches from any
         // host. Cmd+o (file.open) is a menu shortcut in the default preset.

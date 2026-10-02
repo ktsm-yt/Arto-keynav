@@ -28,7 +28,7 @@ pub fn ResetLine(
                 r#type: "button",
                 class: "preference-reset",
                 onclick: move |_| on_reset.call(()),
-                "Reset to {shipped}"
+                "既定値（{shipped}）に戻す"
             }
         }
     }

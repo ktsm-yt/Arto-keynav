@@ -1,150 +1,22 @@
-# Installation
+# Install Arto Keynav
 
-macOS is where Arto is developed and tested. Linux builds are published and
-work, but see [Platform support](#platform-support) below before relying on
-them.
+Arto Keynav is an unofficial fork of [Arto](https://github.com/arto-app/Arto).
+The beta download targets Apple Silicon macOS only; Intel, Windows, and Linux downloads are not provided.
 
-## macOS
+1. Download the `aarch64.dmg` and `SHA256SUMS` from [this fork's releases](https://github.com/ktsm-yt/Arto-keynav/releases).
+2. In the download directory, run `shasum -a 256 -c SHA256SUMS`.
+3. Open the DMG and drag **Arto Keynav.app** to **Applications**.
 
-Install with the [Homebrew] tap. Arto is not signed or notarized with an Apple
-Developer ID, so the quarantine attribute has to be removed after installing —
-see [homebrew-tap] for why.
+The beta is ad-hoc signed, not Developer ID signed or notarized. If Gatekeeper blocks it, review the source of the download and allow this app through **System Settings → Privacy & Security**. Do not disable Gatekeeper system-wide.
 
-```sh
-brew install --cask arto-app/tap/arto
-xattr -dr com.apple.quarantine /Applications/Arto.app
-```
+This fork has its own bundle identifier, settings, history, cache, IPC socket, and Keychain service. It does not replace `Arto.app` or import its settings. macOS settings live in `~/Library/Application Support/arto-keynav/`.
 
-> [!TIP]
-> **Quick Look preview not showing?** macOS normally registers the Quick Look extension the first time you launch Arto. If pressing Space on a Markdown file still shows no preview — or a stale one right after an upgrade — register the extension manually and refresh the cache:
->
-> ```sh
-> pluginkit -a /Applications/Arto.app/Contents/PlugIns/ArtoQuickLook.appex
-> qlmanage -r && qlmanage -r cache
-> ```
+The beta does not embed a Quick Look extension, so an existing upstream Markdown preview provider stays in charge.
 
-## Linux
-
-On Debian and Ubuntu, download the `.deb` matching your architecture from the [releases] page and install it with `apt`, which pulls in the GTK/WebKit libraries it declares:
+For terminal use, invoke the executable inside this app:
 
 ```sh
-sudo apt install ./arto_<version>_amd64.deb
+"/Applications/Arto Keynav.app/Contents/MacOS/arto" README.md
 ```
 
-On every other distribution — Fedora, openSUSE, Arch — download the `.AppImage` instead, make it executable and run it:
-
-```sh
-chmod +x arto_<version>_x86_64.AppImage
-./arto_<version>_x86_64.AppImage
-```
-
-The AppImage needs WebKitGTK 4.1 installed on the system. It is the one thing
-the image deliberately does not carry: WebKitGTK renders pages in helper
-processes that it looks for at a path fixed when your distribution built it, so
-the library and those helpers only work as the set your package manager
-installed. Install it first if it is missing:
-
-```sh
-sudo dnf install webkit2gtk4.1          # Fedora
-sudo zypper install libwebkit2gtk-4_1-0 # openSUSE
-sudo pacman -S webkit2gtk-4.1           # Arch
-```
-
-Both artifacts are built on Ubuntu 24.04, so they require glibc 2.39 or newer (Ubuntu 24.04+, Debian 13+, Fedora 40+). On older distributions, build from source or use Nix.
-
-## Windows
-
-Download the `Arto_<version>_x64-setup.exe` — or `_arm64-` — from the
-[releases] page and run it. It installs Arto, adds it to the Start menu and
-registers the Markdown files it opens.
-
-Arto renders through Microsoft's WebView2 runtime. Windows 11 ships it and
-Windows 10 usually has it from Edge, but where it is missing the installer
-fetches it, so that first install needs a working connection. Nothing after it
-does: the app renders offline.
-
-## A single binary
-
-Every release also carries the application as one executable, for Linux and
-Windows, when a package is more ceremony than you want. Download the one for
-your machine from the [releases] page and run it from wherever you put it —
-the stylesheet, the scripts and the icons are compiled into it, so there is
-nothing to install beside it.
-
-```sh
-chmod +x arto-linux-x86_64
-./arto-linux-x86_64 README.md
-```
-
-It is the same application, without what an installer arranges around it: no
-menu entry, no file associations, and no `arto` on your `PATH` unless you put
-it there. The Linux binary still needs WebKitGTK 4.1 on the system, exactly as
-the `.deb` and the AppImage do.
-
-On Windows the two also differ in how they meet a terminal. The installed copy
-is a GUI program, which is what keeps a command prompt from opening behind a
-document started from Explorer or the Start menu. The single binary is a
-console program, because it is the copy people run from a terminal and only
-such a program makes the shell wait for it — see [CLI usage](./cli.md).
-Double-click it instead and it hides the console it was given.
-
-Both carry the Microsoft C runtime inside them, so neither asks for the Visual
-C++ redistributable to be installed first.
-
-macOS has no such download on purpose. Most of what makes Arto worth
-installing there — the Finder associations and the Quick Look preview — is
-carried by the app bundle rather than by the executable inside it, so the DMG
-is the whole story.
-
-## Nix
-
-[Nix] works on both macOS and Linux. To try Arto without installing it:
-
-```sh
-nix run github:arto-app/Arto
-```
-
-For a permanent installation, use [nix-darwin] or [home-manager]. Add the flake input:
-
-```nix
-arto.url = "github:arto-app/Arto";
-```
-
-Then add the package to `environment.systemPackages` (nix-darwin) or `home.packages` (home-manager):
-
-```nix
-environment.systemPackages = [ inputs.arto.packages.${system}.default ];
-```
-
-The standalone page renderer is a separate package, `arto-page`, for machines that only need `arto page` without the app:
-
-```sh
-nix run github:arto-app/Arto#arto-page -- README.md > README.html
-```
-
-## Platform support
-
-| Platform | Status |
-| --- | --- |
-| macOS | Supported. Developed and tested here, and the only platform with Quick Look integration. |
-| Linux | Experimental. Builds are published and CI runs the test suite, but the desktop integration gets far less real use. |
-| Windows | Experimental. CI builds and tests it, and a release carries an installer and a single binary when that build succeeds, but almost nobody runs it. |
-
-Bug reports for the experimental platforms are welcome, and so are PRs.
-
-## After installing
-
-Launch Arto to see the welcome screen, which lists the keyboard shortcuts and
-how to get started.
-
-Homebrew, the `.deb` and Nix also put an `arto` command on your `PATH`. The
-AppImage and the single binary do not — each is one self-contained file, so run
-it by its own path instead. Either way, see [CLI usage](./cli.md) for what you
-can hand it.
-
-[Homebrew]: https://brew.sh/
-[homebrew-tap]: https://github.com/arto-app/homebrew-tap
-[releases]: https://github.com/arto-app/Arto/releases
-[Nix]: https://nixos.org/
-[nix-darwin]: https://github.com/nix-darwin/nix-darwin
-[home-manager]: https://github.com/nix-community/home-manager
+To build and verify locally, see the [README](../README.md#ソースからビルドする).

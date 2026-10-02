@@ -15,6 +15,53 @@ use crate::utils::file::is_markdown_file;
 /// Prevents unbounded recursion from symlink cycles or extremely deep trees.
 const MAX_DEPTH: usize = 128;
 
+/// Markdown documents under a root, with directories before files like the sidebar.
+fn markdown_files(dir: &Path, depth: usize, files: &mut Vec<PathBuf>) {
+    if depth >= MAX_DEPTH {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+    let mut folders = Vec::new();
+    let mut local_files = Vec::new();
+    for entry in entries.filter_map(Result::ok) {
+        let path = entry.path();
+        if path
+            .file_name()
+            .is_some_and(|name| name.to_string_lossy().starts_with('.'))
+        {
+            continue;
+        }
+        match entry.file_type() {
+            Ok(kind) if kind.is_dir() => folders.push(path),
+            Ok(kind) if kind.is_file() && is_markdown_file(&path) => local_files.push(path),
+            _ => {}
+        }
+    }
+    folders.sort();
+    local_files.sort();
+    for folder in folders {
+        markdown_files(&folder, depth + 1, files);
+    }
+    files.extend(local_files);
+}
+
+/// Step to the next Markdown document within the chosen folder tree.
+pub fn adjacent_markdown_file(current: &Path, root: &Path, forward: bool) -> Option<PathBuf> {
+    if !current.starts_with(root) {
+        return None;
+    }
+    let mut files = Vec::new();
+    markdown_files(root, 0, &mut files);
+    let at = files.iter().position(|file| file == current)?;
+    if forward {
+        files.get(at + 1).cloned()
+    } else {
+        at.checked_sub(1).and_then(|i| files.get(i)).cloned()
+    }
+}
+
 /// Build a flat list of visible tree nodes, over every root the tree shows.
 ///
 /// Replicates the ordering in `file_explorer.rs`: each root heads its own
@@ -159,6 +206,46 @@ mod tests {
     use super::*;
     use std::fs;
     use tempfile::TempDir;
+
+    #[test]
+    fn adjacent_markdown_file_crosses_courses_and_skips_non_documents() {
+        let dir = TempDir::new().unwrap();
+        let first_course = dir.path().join("01_course");
+        let second_course = dir.path().join("02_course");
+        let chapter = first_course.join("01_chapter");
+        let empty = first_course.join("02_empty");
+        let next_chapter = first_course.join("03_chapter");
+        let next_course_chapter = second_course.join("01_chapter");
+        let hidden = dir.path().join(".hidden");
+        for folder in [
+            &chapter,
+            &empty,
+            &next_chapter,
+            &next_course_chapter,
+            &hidden,
+        ] {
+            fs::create_dir_all(folder).unwrap();
+        }
+        for name in ["01.md", "02.txt", "03.md"] {
+            fs::write(chapter.join(name), "# page").unwrap();
+        }
+        fs::write(next_chapter.join("01.md"), "# next chapter").unwrap();
+        fs::write(next_course_chapter.join("01.md"), "# next course").unwrap();
+        fs::write(hidden.join("01.md"), "# hidden").unwrap();
+        let first = chapter.join("01.md");
+        let last = chapter.join("03.md");
+        let next = next_chapter.join("01.md");
+        let next_course = next_course_chapter.join("01.md");
+        let step = |current: &Path, forward| adjacent_markdown_file(current, dir.path(), forward);
+        assert_eq!(step(&first, true), Some(last.clone()));
+        assert_eq!(step(&last, false), Some(first.clone()));
+        assert_eq!(step(&first, false), None);
+        assert_eq!(step(&last, true), Some(next.clone()));
+        assert_eq!(step(&next, false), Some(last));
+        assert_eq!(step(&next, true), Some(next_course.clone()));
+        assert_eq!(step(&next_course, false), Some(next));
+        assert_eq!(step(&next_course, true), None);
+    }
 
     /// One root's visible items, without the root row `visible_items_in_roots`
     /// draws above them.

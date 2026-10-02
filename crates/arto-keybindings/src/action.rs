@@ -85,6 +85,8 @@ pub enum Action {
 
     // File (4) — MenuId: Open, OpenDirectory, Preferences, RevealInFinder
     FileOpen,
+    FileNext,
+    FilePrevious,
     FileOpenDirectory,
     FileSetParentAsRoot,
     FileToggleBookmark,
@@ -252,6 +254,8 @@ pub const ACTION_GROUPS: &[(&str, &[Action])] = &[
         "File",
         &[
             Action::FileOpen,
+            Action::FileNext,
+            Action::FilePrevious,
             Action::FileOpenDirectory,
             Action::FileSetParentAsRoot,
             Action::FileToggleBookmark,
@@ -626,6 +630,8 @@ action_strings! {
     FocusLinks => "focus.links",
     FocusContent => "focus.content",
     FileOpen => "file.open",
+    FileNext => "file.next",
+    FilePrevious => "file.previous",
     FileOpenDirectory => "file.open_directory",
     FileSetParentAsRoot => "file.set_parent_as_root",
     FileToggleBookmark => "file.toggle_bookmark",
@@ -693,7 +699,7 @@ mod tests {
 
     #[test]
     fn all_actions_count() {
-        assert_eq!(all_actions().len(), 101);
+        assert_eq!(all_actions().len(), 103);
     }
 
     #[test]

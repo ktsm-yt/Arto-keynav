@@ -19,7 +19,7 @@ pub fn ToggleRow(
 ) -> Element {
     let reset_to = shipped
         .filter(|shipped| shipped != &checked)
-        .map(|shipped| if shipped { "on" } else { "off" }.to_string());
+        .map(|shipped| if shipped { "オン" } else { "オフ" }.to_string());
 
     rsx! {
         div {

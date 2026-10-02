@@ -44,7 +44,7 @@ pub fn AppMenu(on_close: EventHandler<()>) -> Element {
                 state.open_preferences();
                 close();
             } }
-            ContextMenuItem { label: "Preferences...", shortcut: shortcut("file.preferences"), icon: Some(IconName::Gear), on_click: move |_| {
+            ContextMenuItem { label: "設定…", shortcut: shortcut("file.preferences"), icon: Some(IconName::Gear), on_click: move |_| {
                 state.open_preferences();
                 close();
             } }
@@ -176,7 +176,7 @@ pub fn AppMenu(on_close: EventHandler<()>) -> Element {
             // === Help ===
             ContextMenuSubmenu { label: "Help", icon: Some(IconName::HelpCircle),
                 ContextMenuItem { label: "Go to Homepage", shortcut: shortcut("app.go_to_homepage"), icon: Some(IconName::ExternalLink), on_click: move |_| {
-                    let _ = open::that("https://github.com/arto-app/Arto");
+                    let _ = open::that("https://github.com/ktsm-yt/Arto-keynav");
                     close();
                 } }
             }

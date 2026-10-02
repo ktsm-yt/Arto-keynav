@@ -176,6 +176,28 @@ pub(super) enum CursorDirection {
     Up,
 }
 
+pub(super) fn dispatch_file_step(state: &mut AppState, forward: bool) {
+    let Some(current) = state.current_file() else {
+        return;
+    };
+    let root = state
+        .sidebar
+        .read()
+        .roots
+        .places()
+        .iter()
+        .filter(|root| current.starts_with(root))
+        .min_by_key(|root| root.components().count())
+        .cloned()
+        .or_else(|| current.parent()?.parent().map(std::path::Path::to_path_buf));
+    if let Some(next) = root
+        .as_deref()
+        .and_then(|root| sidebar_cursor::adjacent_markdown_file(&current, root, forward))
+    {
+        state.open_file(next);
+    }
+}
+
 pub(super) fn dispatch_cursor_move(state: &mut AppState, direction: CursorDirection) {
     if *state.focused_panel.read() != FocusedPanel::Panel {
         return;
@@ -216,7 +238,32 @@ pub(super) fn dispatch_cursor_open(state: &mut AppState) {
     let panel = *state.focused_panel.read();
     match panel {
         FocusedPanel::Panel => open_panel_row(state),
-        FocusedPanel::Content => {}
+        FocusedPanel::Content => {
+            if focus_current_folder(state) {
+                open_panel_row(state);
+            }
+        }
+    }
+}
+
+/// Move from reading into the folder holding the document, without changing it.
+fn focus_current_folder(state: &mut AppState) -> bool {
+    let Some(file) = state.current_file() else {
+        return false;
+    };
+    state.focus_face(crate::state::Face::Places);
+    state.reveal_in_roots(&file);
+    let items = panel_items(state);
+    let parent = state
+        .panel_cursor
+        .peek()
+        .as_ref()
+        .and_then(|row| sidebar_cursor::find_parent_dir(row, &items));
+    if let Some(parent) = parent {
+        state.panel_cursor.set(Some(parent));
+        true
+    } else {
+        false
     }
 }
 
@@ -231,6 +278,7 @@ pub(super) fn open_panel_row(state: &mut AppState) {
     if !path.is_dir() {
         if path.exists() {
             open_row_document(state, &path);
+            state.focus_content();
         }
         return;
     }
@@ -251,7 +299,8 @@ pub(super) fn open_panel_row(state: &mut AppState) {
 }
 
 pub(super) fn dispatch_cursor_collapse(state: &mut AppState) {
-    if *state.focused_panel.read() != FocusedPanel::Panel {
+    let in_content = *state.focused_panel.read() == FocusedPanel::Content;
+    if in_content && !focus_current_folder(state) {
         return;
     }
     let Some(row) = state.panel_cursor.read().clone() else {
@@ -261,11 +310,20 @@ pub(super) fn dispatch_cursor_collapse(state: &mut AppState) {
     let root = root_of(state, &row);
     if path.is_dir() && state.sidebar.peek().is_expanded(group, &root, &path) {
         state.toggle_directory_expansion(group, &root, &path);
+        scroll_cursor_into_view();
         return;
     }
     // Out of a folder is up to the one holding it, where the list has one.
     let items = panel_items(state);
     if let Some(parent) = sidebar_cursor::find_parent_dir(&row, &items) {
+        let parent_root = root_of(state, &parent);
+        if state
+            .sidebar
+            .peek()
+            .is_expanded(parent.0, &parent_root, &parent.1)
+        {
+            state.toggle_directory_expansion(parent.0, &parent_root, &parent.1);
+        }
         state.panel_cursor.set(Some(parent));
         scroll_cursor_into_view();
     }

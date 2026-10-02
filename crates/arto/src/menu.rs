@@ -18,6 +18,7 @@ use crate::window::{self, CreateMainWindowConfigParams};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MenuId {
     About,
+    Quit,
     NewWindow,
     DuplicateWindow,
     NewDocument,
@@ -48,6 +49,7 @@ impl MenuId {
     fn from_str(s: &str) -> Option<Self> {
         match s {
             "app.about" => Some(Self::About),
+            "app.quit" => Some(Self::Quit),
             "file.new_window" => Some(Self::NewWindow),
             "file.duplicate_window" => Some(Self::DuplicateWindow),
             "file.new_document" => Some(Self::NewDocument),
@@ -79,6 +81,7 @@ impl MenuId {
     fn as_str(self) -> &'static str {
         match self {
             Self::About => "app.about",
+            Self::Quit => "app.quit",
             Self::NewWindow => "file.new_window",
             Self::DuplicateWindow => "file.duplicate_window",
             Self::NewDocument => "file.new_document",
@@ -186,6 +189,7 @@ pub fn refresh_menu_accelerators() {
 fn menu_action_for_id(id: MenuId) -> Option<&'static str> {
     Some(match id {
         MenuId::About => "app.about",
+        MenuId::Quit => return None,
         MenuId::NewWindow => "window.new",
         MenuId::DuplicateWindow => "window.duplicate",
         MenuId::NewDocument => "window.new_document",
@@ -234,15 +238,21 @@ pub fn build_menu() -> Menu {
 }
 
 fn add_app_menu(menu: &Menu) {
-    let arto_menu = Submenu::new("Arto", true);
+    let arto_menu = Submenu::new("Arto Keynav", true);
 
     arto_menu
         .append_items(&[
-            &create_menu_item(MenuId::About, "About Arto"),
+            &create_menu_item(MenuId::About, "About Arto Keynav"),
             &PredefinedMenuItem::separator(),
-            &create_menu_item(MenuId::Preferences, "Preferences..."),
+            &create_menu_item(MenuId::Preferences, "設定…"),
             &PredefinedMenuItem::separator(),
-            &PredefinedMenuItem::quit(Some("Quit")),
+            // Close through Dioxus so the window's save hooks run before exit.
+            &MenuItem::with_id(
+                MenuId::Quit.as_str(),
+                "Quit",
+                true,
+                accelerator_for_key("Cmd+q"),
+            ),
         ])
         .unwrap();
 
@@ -328,6 +338,8 @@ fn add_window_menu(menu: &Menu) {
 
     window_menu
         .append_items(&[
+            &PredefinedMenuItem::minimize(Some("最小化")),
+            &PredefinedMenuItem::separator(),
             &create_menu_item(MenuId::CloseAllChildWindows, "Close All Child Windows"),
             &create_menu_item(MenuId::CloseAllWindows, "Close All Windows"),
         ])
@@ -375,6 +387,9 @@ pub fn handle_menu_event_global(event: &MenuEvent) -> bool {
     };
 
     match id {
+        MenuId::Quit => {
+            window::shutdown_all_windows();
+        }
         MenuId::NewWindow => {
             window::create_main_window_sync(
                 &window(),
@@ -404,7 +419,7 @@ pub fn handle_menu_event_global(event: &MenuEvent) -> bool {
             window::close_all_main_windows();
         }
         MenuId::GoToHomepage => {
-            let _ = open::that("https://github.com/arto-app/Arto");
+            let _ = open::that("https://github.com/ktsm-yt/Arto-keynav");
         }
         _ => return false,
     }
@@ -494,6 +509,7 @@ mod tests {
     /// Every item the menu bar has.
     const ALL_MENU_IDS: &[MenuId] = &[
         MenuId::About,
+        MenuId::Quit,
         MenuId::NewWindow,
         MenuId::DuplicateWindow,
         MenuId::NewDocument,
@@ -525,6 +541,7 @@ mod tests {
     fn test_menu_id_roundtrip() {
         let all_ids = [
             "app.about",
+            "app.quit",
             "file.new_window",
             "file.duplicate_window",
             "file.new_document",
@@ -568,6 +585,10 @@ mod tests {
     #[test]
     fn menu_actions_cover_all_menu_items() {
         for &id in ALL_MENU_IDS {
+            if id == MenuId::Quit {
+                assert_eq!(menu_action_for_id(id), None);
+                continue;
+            }
             let action = menu_action_for_id(id).expect("menu item has an action");
             assert!(
                 crate::keybindings::is_menu_action(action),
@@ -597,6 +618,14 @@ mod tests {
     fn test_menu_id_unknown_returns_none() {
         assert!(MenuId::from_str("unknown.action").is_none());
         assert!(MenuId::from_str("").is_none());
+    }
+
+    #[test]
+    fn quit_uses_the_global_window_shutdown_handler() {
+        let event = MenuEvent {
+            id: dioxus_desktop::muda::MenuId("app.quit".to_string()),
+        };
+        assert!(handle_menu_event_global(&event));
     }
 
     /// is_close_action correctly identifies close events

@@ -32,6 +32,7 @@ pub(crate) use clipboard::{copy_image_from_src, copy_rasterized_image};
 pub(crate) use highlight::highlight_selection;
 pub(crate) use palette::activate_palette_row;
 pub(crate) use reveal::content_cursor_eval;
+pub(crate) use reveal::scroll_into_view;
 
 /// Execute an action by dispatching to the appropriate handler.
 ///
@@ -214,6 +215,8 @@ pub fn dispatch_action(action: &Action, mut state: AppState) {
                 state.open_file(file);
             }
         }
+        Action::FileNext => dispatch_file_step(&mut state, true),
+        Action::FilePrevious => dispatch_file_step(&mut state, false),
         Action::FileOpenDirectory => {
             if let Some(dir) = pick_directory() {
                 state.add_root(dir);
@@ -246,7 +249,7 @@ pub fn dispatch_action(action: &Action, mut state: AppState) {
             dioxus::desktop::window().close();
         }
         Action::AppGoToHomepage => {
-            let _ = open::that("https://github.com/arto-app/Arto");
+            let _ = open::that("https://github.com/ktsm-yt/Arto-keynav");
         }
         // Both are answered before dispatch, in `keybinding_engine`: they act
         // on the overlay, which is the window's own state and not the

@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   build:
+    if: github.repository == 'arto-app/Arto'
     runs-on: ${{ matrix.os }}
     # A cold cache (e.g. after a source-hash bump invalidates `arto-deps`)
     # makes the full dependency + crate build exceed 30m on the ubuntu runner.

@@ -162,6 +162,32 @@ impl Sidebar {
             current = dir.parent();
         }
     }
+
+    /// Reveal one document in the tree the reader was using.
+    pub fn reveal_document(&mut self, file: &Path, preferred: Group) -> PanelRow {
+        let decision = self.roots.decide(file, Origin::Implicit);
+        self.roots.apply(&decision);
+        let current_root = match decision {
+            crate::roots::Decision::Reveal { root } | crate::roots::Decision::Push { root, .. } => {
+                root
+            }
+        };
+        let place = (preferred == Group::Bookmark)
+            .then(|| {
+                self.roots
+                    .places()
+                    .iter()
+                    .filter(|root| file.starts_with(root))
+                    .max_by_key(|root| root.components().count())
+                    .cloned()
+            })
+            .flatten();
+        let (group, root) = place.map_or((Group::Current, current_root), |root| {
+            (Group::Bookmark, root)
+        });
+        self.expand_towards(group, &root, file);
+        (group, file.to_path_buf())
+    }
 }
 
 impl AppState {
@@ -356,16 +382,15 @@ impl AppState {
     /// Implicit: a root that already covers it is expanded down to it, and
     /// only a document outside every root brings a new one in.
     pub fn reveal_in_roots(&mut self, file: &Path) {
-        let mut sidebar = self.sidebar.write();
-        let decision = sidebar.roots.decide(file, Origin::Implicit);
-        sidebar.roots.apply(&decision);
-        let root = match &decision {
-            crate::roots::Decision::Reveal { root } => root.clone(),
-            crate::roots::Decision::Push { root, .. } => root.clone(),
-        };
-        // Both sides spelled the way the tree spells them: expanding walks the
-        // document's own path up to the root, and a key would not match it.
-        sidebar.expand_towards(Group::Current, &root, file);
+        let group = self
+            .panel_cursor
+            .peek()
+            .as_ref()
+            .map_or(Group::Current, |(group, _)| *group);
+        let row = self.sidebar.write().reveal_document(file, group);
+        if self.sidebar.peek().face == Face::Places {
+            self.panel_cursor.set(Some(row));
+        }
     }
 
     /// Toggle directory expansion state
@@ -377,6 +402,34 @@ impl AppState {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn revealing_a_document_follows_only_the_selected_tree() {
+        let root = PathBuf::from("/course");
+        let file = root.join("02_chapter/03.md");
+        let mut sidebar = Sidebar {
+            roots: Roots::new(vec![root.clone()], vec![root.clone()]),
+            ..Default::default()
+        };
+        assert_eq!(
+            sidebar.reveal_document(&file, Group::Bookmark),
+            (Group::Bookmark, file.clone())
+        );
+        assert!(sidebar.is_expanded(Group::Bookmark, &root, &root.join("02_chapter")));
+        assert!(!sidebar.is_expanded(Group::Current, &root, &root));
+        sidebar.expanded_dirs.clear();
+        assert_eq!(
+            sidebar.reveal_document(&file, Group::Current),
+            (Group::Current, file.clone())
+        );
+        assert!(sidebar.is_expanded(Group::Current, &root, &root.join("02_chapter")));
+        assert!(!sidebar.is_expanded(Group::Bookmark, &root, &root));
+        let outside = PathBuf::from("/elsewhere/01.md");
+        assert_eq!(
+            sidebar.reveal_document(&outside, Group::Bookmark),
+            (Group::Current, outside)
+        );
+    }
 
     #[test]
     fn the_faces_step_in_the_order_the_rail_draws_them() {

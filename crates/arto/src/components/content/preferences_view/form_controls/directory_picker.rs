@@ -22,7 +22,7 @@ pub fn DirectoryPicker(
             .filter(|shipped| shipped != &value)
             .map(|shipped| match shipped {
                 Some(path) => path.display().to_string(),
-                None => "no folder".to_string(),
+                None => "フォルダなし".to_string(),
             });
 
     let handle_browse = move |_| {
@@ -61,7 +61,7 @@ pub fn DirectoryPicker(
             }
             button {
                 class: "icon-button",
-                title: "Browse...",
+                title: "選択...",
                 onclick: handle_browse,
                 Icon { name: IconName::FolderOpen, size: 18 }
             }
@@ -69,7 +69,7 @@ pub fn DirectoryPicker(
                 class: "use-current-button",
                 disabled: current_directory.is_none(),
                 onclick: handle_use_current,
-                "Use Current"
+                "現在の場所を使う"
             }
         }
         ResetLine {

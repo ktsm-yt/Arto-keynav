@@ -1,5 +1,10 @@
-import { describe, test, expect } from "vitest";
-import { inputMethodHasKey, shouldSwallowReservedKey } from "./keyboard-interceptor";
+import { describe, test, expect, vi } from "vitest";
+import {
+  inputMethodHasKey,
+  shouldSwallowReservedKey,
+  setup,
+  onKeydown,
+} from "./keyboard-interceptor";
 
 // ============================================================================
 // shouldSwallowReservedKey
@@ -143,4 +148,59 @@ describe("inputMethodHasKey", () => {
     // keystroke in the window away from the bindings.
     expect(inputMethodHasKey(keystroke({ keyCode: 229 }))).toBe(false);
   });
+});
+
+test("reading arrows cancel native scrolling while typing and IME keep their keys", () => {
+  setup();
+  const callback = vi.fn();
+  onKeydown(callback);
+  const page = document.createElement("div");
+  const input = document.createElement("input");
+  document.body.append(page, input);
+  const press = (target: HTMLElement, key: string, options: KeyboardEventInit = {}) => {
+    const event = new KeyboardEvent("keydown", {
+      key,
+      bubbles: true,
+      cancelable: true,
+      ...options,
+    });
+    target.dispatchEvent(event);
+    return event;
+  };
+  try {
+    for (const key of ["ArrowDown", "ArrowUp"]) {
+      expect(press(page, key).defaultPrevented).toBe(true);
+      expect(callback).toHaveBeenLastCalledWith({
+        key,
+        modifiers: 0,
+        repeat: false,
+        field: undefined,
+      });
+    }
+    expect(press(page, "ArrowDown", { repeat: true }).defaultPrevented).toBe(true);
+    expect(callback).toHaveBeenCalledTimes(3);
+
+    callback.mockClear();
+    expect(press(input, "ArrowUp").defaultPrevented).toBe(false);
+    expect(callback).not.toHaveBeenCalled();
+    input.className = "search-input";
+    expect(press(input, "ArrowDown").defaultPrevented).toBe(false);
+    expect(callback).toHaveBeenCalledTimes(1);
+    input.className = "palette-input";
+    expect(press(input, "ArrowUp").defaultPrevented).toBe(false);
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    callback.mockClear();
+    expect(press(input, "ArrowDown", { isComposing: true }).defaultPrevented).toBe(false);
+    document.dispatchEvent(new CompositionEvent("compositionstart"));
+    expect(press(page, "ArrowUp").defaultPrevented).toBe(false);
+    document.dispatchEvent(new CompositionEvent("compositionend"));
+    expect(callback).not.toHaveBeenCalled();
+    expect(press(page, "ArrowDown", { altKey: true }).defaultPrevented).toBe(false);
+    expect(press(page, "PageDown").defaultPrevented).toBe(false);
+  } finally {
+    document.dispatchEvent(new CompositionEvent("compositionend"));
+    page.remove();
+    input.remove();
+  }
 });

@@ -16,8 +16,8 @@ version = "0.0.0"
 authors = ["Alisue <lambdalisue@gmail.com>"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/arto-app/Arto"
-homepage = "https://arto-app.github.io"
+repository = "https://github.com/ktsm-yt/Arto-keynav"
+homepage = "https://github.com/ktsm-yt/Arto-keynav"
 # The repository README, which every member shows on its registry page. There
 # is no per-crate README: what a reader of any of these wants first is what
 # Arto is, and a stub saying "part of Arto, see the repository" would be a

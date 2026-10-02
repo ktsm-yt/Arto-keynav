@@ -55,8 +55,8 @@
 //!
 //! # Socket location
 //!
-//! Unix: `$XDG_RUNTIME_DIR/com.lambdalisue.arto.sock`, or
-//! `/tmp/arto-<uid>/com.lambdalisue.arto.sock` when there is no runtime
+//! Unix: `$XDG_RUNTIME_DIR/io.github.ktsm-yt.artokeynav.sock`, or
+//! `/tmp/arto-keynav-<uid>/io.github.ktsm-yt.artokeynav.sock` when there is no runtime
 //! directory. Windows: a named pipe carrying the user name. See
 //! [`socket_path`].
 

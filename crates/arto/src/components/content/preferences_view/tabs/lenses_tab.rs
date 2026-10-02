@@ -39,13 +39,13 @@ pub fn LensesTab(config: Signal<Config>) -> Element {
 
             p {
                 class: "preference-lede",
-                "An agent or a command that looks at the document you are reading and shows its answer with it — a translation in the page's places, a summary from the header, a note beside each paragraph. Nothing is sent anywhere until you open one."
+                "読んでいるドキュメントをAIやコマンドに渡し、翻訳・要約・注釈を表示する機能です。レンズを開くまで内容は送信されません。"
             }
 
-            h3 { class: "preference-section-title", "Lenses" }
+            h3 { class: "preference-section-title", "レンズ" }
 
             if lenses.is_empty() {
-                p { class: "preference-description lens-empty", "No lenses yet. Start from a recipe below, or from a blank one." }
+                p { class: "preference-description lens-empty", "レンズはまだありません。下のレシピか空のレンズから作成できます。" }
             }
 
             for (index, (lens, problem)) in lenses.into_iter().zip(problems).enumerate() {
@@ -82,14 +82,14 @@ pub fn LensesTab(config: Signal<Config>) -> Element {
                         add(Lens::new(id));
                     },
                     Icon { name: IconName::Add, size: 14 }
-                    span { "Blank lens" }
+                    span { "空のレンズ" }
                 }
             }
 
-            h3 { class: "preference-section-title", "Start from a recipe" }
+            h3 { class: "preference-section-title", "レシピから作成" }
             p {
                 class: "preference-description",
-                "A lens written in advance: pick one, fill in the language and who answers, and add it."
+                "あらかじめ用意されたレンズです。言語と回答する相手を選んで追加します。"
             }
             RecipePicker {
                 taken: config.read().lenses.clone(),
@@ -182,9 +182,9 @@ fn RecipePicker(
                         div {
                             class: "lens-recipe-head",
                             Icon { name: recipe_icon(option), size: 20, class: "lens-recipe-icon" }
-                            span { class: "lens-recipe-title", "{option.title()}" }
+                            span { class: "lens-recipe-title", "{recipe_title(option)}" }
                         }
-                        span { class: "lens-recipe-desc", "{option.description()}" }
+                        span { class: "lens-recipe-desc", "{recipe_description(option)}" }
                         span { class: "lens-recipe-tag", "{display_title(option.display())}" }
                     }
                 }
@@ -197,39 +197,39 @@ fn RecipePicker(
                         div {
                             class: "lens-language-pair",
                             TextField {
-                                label: "Between",
-                                hint: "Text in this language is translated into the other.",
+                                label: "言語1",
+                                hint: "この言語の文章をもう一方の言語へ翻訳します。",
                                 value: filled.languages[0].clone(),
                                 on_input: move |text: String| blanks.write().languages[0] = text,
                             }
                             span { class: "lens-language-swap", "aria-hidden": "true", "⇄" }
                             TextField {
-                                label: "And",
-                                hint: "Text in this language is translated into the other; text in any other language, into this one.",
+                                label: "言語2",
+                                hint: "この言語の文章をもう一方の言語へ翻訳します。ほかの言語の文章は、この言語へ翻訳します。",
                                 value: filled.languages[1].clone(),
                                 on_input: move |text: String| blanks.write().languages[1] = text,
                             }
                         }
                     } else {
                         TextField {
-                            label: "Language",
-                            hint: "The language the answer is written in, named in English.",
+                            label: "回答の言語",
+                            hint: "回答に使う言語名を英語で指定します。",
                             value: filled.language.clone(),
                             on_input: move |text: String| blanks.write().language = text,
                         }
                     }
                     if chosen.asks_audience() {
                         TextField {
-                            label: "For whom",
-                            hint: "Who the explanation is written for — a newcomer to the subject when left empty.",
+                            label: "対象読者",
+                            hint: "説明の対象読者です。空欄なら初学者向けになります。",
                             value: filled.audience.clone(),
                             on_input: move |text: String| blanks.write().audience = text,
                         }
                     }
                     ChoiceRow {
                         name: "recipe-agent".to_string(),
-                        label: "Asks".to_string(),
-                        description: Some(filled.agent.profile().introduction.to_string()),
+                        label: "回答する相手".to_string(),
+                        description: Some(agent_introduction(filled.agent).to_string()),
                         options: LensAgent::ALL
                             .into_iter()
                             .map(|agent| ChoiceItem { value: agent, label: agent_name(Some(agent)).to_string() })
@@ -247,17 +247,17 @@ fn RecipePicker(
                         source: ModelSource::of(&draft),
                         key_revision,
                         hint: match chosen.model(filled.agent) {
-                            Some(model) => format!("The recipe's choice for {}: {model}.", agent_name(Some(filled.agent))),
-                            None if filled.agent.is_server() => "Required: pick one the server offers.".to_string(),
-                            None => "Left empty, the agent's own default.".to_string(),
+                            Some(model) => format!("{}向けのレシピ指定: {model}", agent_name(Some(filled.agent))),
+                            None if filled.agent.is_server() => "必須です。サーバーが提供するモデルを選んでください。".to_string(),
+                            None => "空欄ならエージェントの既定値を使います。".to_string(),
                         },
                         value: filled.model.clone(),
                         on_input: move |text: String| blanks.write().model = text,
                     }
-                    if let Some(server) = filled.agent.server().filter(|server| server.remote) {
+                    if filled.agent.server().is_some_and(|server| server.remote) {
                         TextField {
-                            label: "Endpoint",
-                            hint: server.endpoint_hint,
+                            label: "エンドポイント",
+                            hint: endpoint_hint(filled.agent),
                             value: filled.endpoint.clone(),
                             monospace: true,
                             on_input: move |text: String| blanks.write().endpoint = text,
@@ -272,7 +272,7 @@ fn RecipePicker(
                         }
                     }
                     if let Some(problem) = &problem {
-                        p { class: "lens-card-problem", "Not ready: {problem}" }
+                        p { class: "lens-card-problem", "準備ができていません: {problem}" }
                     }
                     div {
                         class: "lens-add-line",
@@ -288,14 +288,14 @@ fn RecipePicker(
                                     }
                                 },
                                 Icon { name: IconName::Add, size: 14 }
-                                span { "Add “{draft.label}”" }
+                                span { "「{draft.label}」を追加" }
                             }
                         }
                         button {
                             class: "lens-button",
                             r#type: "button",
                             onclick: move |_| recipe.set(None),
-                            "Cancel"
+                            "キャンセル"
                         }
                     }
                 }
@@ -366,23 +366,103 @@ fn argv(text: &str) -> Vec<String> {
 /// What a display does, in the words the cards and the list use.
 fn display_title(display: LensDisplay) -> &'static str {
     match display {
-        LensDisplay::Page => "Replaces the page",
-        LensDisplay::Popover => "One answer on request",
-        LensDisplay::Annotate => "A note beside each block",
+        LensDisplay::Page => "ページを置き換える",
+        LensDisplay::Popover => "必要なときに回答を表示",
+        LensDisplay::Annotate => "各ブロックの横に注釈を表示",
     }
 }
 
 fn display_description(display: LensDisplay) -> &'static str {
     match display {
         LensDisplay::Page => {
-            "The answer takes the document's places, block by block from the top as it is written. For a translation."
+            "回答をドキュメントの代わりに上からブロックごとに表示します。翻訳向けです。"
         }
         LensDisplay::Popover => {
-            "Asked for the whole document from the header, or for one block from its menu, and shown in a popover. For a summary."
+            "ヘッダーやメニューから要求して、ポップオーバーで回答を表示します。要約向けです。"
         }
         LensDisplay::Annotate => {
-            "Every block is asked about on its own; each answer waits behind a mark in the margin. For a gloss or an explanation."
+            "各ブロックについて個別に回答し、余白のマークから表示します。用語解説向けです。"
         }
+    }
+}
+
+fn recipe_title(recipe: LensRecipe) -> &'static str {
+    match recipe {
+        LensRecipe::TranslatePage => "ページを翻訳",
+        LensRecipe::TranslateBeside => "各ブロックの横に翻訳を表示",
+        LensRecipe::Summarize => "要約",
+        LensRecipe::ExplainTerms => "用語を解説",
+        LensRecipe::Critique => "批評",
+        LensRecipe::FactCheck => "ファクトチェック",
+        LensRecipe::ExplainBlock => "ブロックを解説",
+    }
+}
+
+fn recipe_description(recipe: LensRecipe) -> &'static str {
+    match recipe {
+        LensRecipe::TranslatePage => {
+            "2つの言語の間で、ドキュメント全体を上からブロックごとに翻訳します。"
+        }
+        LensRecipe::TranslateBeside => {
+            "各ブロックを翻訳し、原文を残したまま余白のマークから表示します。"
+        }
+        LensRecipe::Summarize => "ヘッダーから開く、ドキュメントの要点と主要なポイントです。",
+        LensRecipe::ExplainTerms => {
+            "初学者が知らない可能性のある用語、略語、固有名詞を各ブロックの横で解説します。"
+        }
+        LensRecipe::Critique => {
+            "根拠がない主張、曖昧な表現、論理の飛躍を各ブロックの横で指摘します。"
+        }
+        LensRecipe::FactCheck => {
+            "Web検索を使い、確認できない・矛盾する主張を出典とともに各ブロックの横で示します。"
+        }
+        LensRecipe::ExplainBlock => {
+            "メニューで選んだブロックを、指定した読者向けに平易な言葉で解説します。"
+        }
+    }
+}
+
+fn agent_introduction(agent: LensAgent) -> &'static str {
+    match agent {
+        LensAgent::Claude => "すでにサインインしている claude コマンドを使います。",
+        LensAgent::Codex => "すでにサインインしている codex コマンドを使います。",
+        LensAgent::Ollama => "このMacでOllamaを通じて動くモデルです。内容は外部へ送信されません。",
+        LensAgent::Openai => "OpenAI、またはOpenAI互換APIを持つサーバーを使います。",
+    }
+}
+
+fn agent_description(agent: LensAgent) -> &'static str {
+    match agent {
+        LensAgent::Claude => "すでにサインインしている claude コマンドです。",
+        LensAgent::Codex => "すでにサインインしている codex コマンドです。",
+        LensAgent::Ollama => "OllamaのAPIを使うローカルサーバーです。",
+        LensAgent::Openai => "LM Studio、llama.cpp、OpenAIなどのOpenAI互換APIサーバーです。",
+    }
+}
+
+fn endpoint_hint(agent: LensAgent) -> &'static str {
+    match agent {
+        LensAgent::Ollama => "空欄なら http://127.0.0.1:11434 を使います。",
+        LensAgent::Openai => {
+            "ベースURLを指定します。空欄なら https://api.openai.com/v1 を使います。"
+        }
+        LensAgent::Claude | LensAgent::Codex => "",
+    }
+}
+
+fn capability_label(capability: crate::config::LensCapability) -> &'static str {
+    match capability {
+        crate::config::LensCapability::WebSearch => "Webを検索",
+        crate::config::LensCapability::ReadFiles => "ドキュメント周辺のファイルを読む",
+        crate::config::LensCapability::Shell => "コマンドを実行",
+    }
+}
+
+fn capability_description(capability: crate::config::LensCapability) -> &'static str {
+    match capability {
+        crate::config::LensCapability::WebSearch => "ファクトチェック向けです。本文に書かれた内容を検索し、見つけたページを読みます。",
+        crate::config::LensCapability::ReadFiles => "ドキュメントは周辺ファイルを読んで回答に含めたり、検索を通じて外部へ送るよう指示できます。信頼できるドキュメントでのみ許可してください。",
+        crate::config::LensCapability::Shell => "ファイル読み取りに加え、コマンドができる操作も許可します。信頼できるドキュメントでのみ許可してください。",
     }
 }
 
@@ -397,7 +477,7 @@ fn prompt_hint(display: LensDisplay) -> &'static str {
 }
 
 fn agent_name(agent: Option<LensAgent>) -> &'static str {
-    agent.map_or("Command", |agent| agent.profile().name)
+    agent.map_or("コマンド", |agent| agent.profile().name)
 }
 
 /// One lens: what it is called and does at a glance, dragged by that line
@@ -463,7 +543,7 @@ fn LensCard(
                     button {
                         class: "lens-icon-button",
                         class: if is_open { "active" },
-                        title: if is_open { "Close" } else { "Edit" },
+                        title: if is_open { "閉じる" } else { "編集" },
                         onclick: move |_| open.set(if is_open { None } else { Some(index) }),
                         Icon { name: IconName::Edit, size: 16 }
                     }
@@ -476,12 +556,12 @@ fn LensCard(
                                 open.set(None);
                             },
                             onmouseleave: move |_| confirming.set(false),
-                            "Remove"
+                            "削除"
                         }
                     } else {
                         button {
                             class: "lens-icon-button",
-                            title: "Remove",
+                        title: "削除",
                             onclick: move |_| confirming.set(true),
                             Icon { name: IconName::Trash, size: 16 }
                         }
@@ -490,7 +570,7 @@ fn LensCard(
             }
 
             if let Some(problem) = &problem {
-                p { class: "lens-card-problem", "Not offered: {problem}" }
+                p { class: "lens-card-problem", "利用できません: {problem}" }
             }
 
             if is_open {
@@ -527,21 +607,21 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
             class: "lens-form",
 
             TextField {
-                label: "Label",
-                hint: "What the menus call it.",
+                label: "表示名",
+                hint: "メニューに表示する名前です。",
                 value: lens.label.clone(),
                 on_input: move |text: String| edit(config, index, |lens| lens.label = text),
             }
             TextField {
                 label: "ID",
-                hint: "Unique among the lenses; earlier answers are kept under it.",
+                hint: "レンズごとに一意のIDです。以前の回答もこのIDに紐付きます。",
                 value: lens.id.clone(),
                 monospace: true,
                 on_input: move |text: String| edit(config, index, |lens| lens.id = text.trim().to_string()),
             }
             TextField {
-                label: "Shortcut",
-                hint: "Keys that show or hide the lens while reading, written as in Keybindings: Cmd+Shift+t, or g t for one after another.",
+                label: "ショートカット",
+                hint: "閲覧中にレンズを表示・非表示するキーです。例: Cmd+Shift+t、g t。",
                 value: lens.shortcut.clone().unwrap_or_default(),
                 monospace: true,
                 on_input: move |text: String| edit(config, index, |lens| {
@@ -550,14 +630,14 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
                 }),
             }
             if let Some(holder) = shortcut_holder {
-                p { class: "lens-card-problem", "Not bound: these keys already belong to {holder}." }
+                p { class: "lens-card-problem", "割り当てできません: このキーはすでに {holder} に使われています。" }
             }
 
             // Cards rather than a row of words: what each display does is
             // the whole of the choice, and a word for it says too little.
             div {
                 class: "lens-field",
-                span { class: "lens-field-label", "How the answer is shown" }
+                span { class: "lens-field-label", "回答の表示方法" }
                 OptionCards {
                     name: format!("lens-{index}-display"),
                     options: [LensDisplay::Page, LensDisplay::Popover, LensDisplay::Annotate]
@@ -577,11 +657,11 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
             if lens.display == LensDisplay::Page {
                 ChoiceRow {
                     name: format!("lens-{index}-unit"),
-                    label: "Handed over".to_string(),
-                    description: Some("The whole document in one run suits a general model; one block per run suits a small translation model.".to_string()),
+                    label: "送る単位".to_string(),
+                    description: Some("ドキュメント全体またはブロックごとに送ります。".to_string()),
                     options: vec![
-                        ChoiceItem { value: LensUnit::Document, label: "Whole document".to_string() },
-                        ChoiceItem { value: LensUnit::Block, label: "Block by block".to_string() },
+                        ChoiceItem { value: LensUnit::Document, label: "ドキュメント全体".to_string() },
+                        ChoiceItem { value: LensUnit::Block, label: "ブロックごと".to_string() },
                     ],
                     selected: lens.unit,
                     on_change: move |unit| edit(config, index, |lens| lens.unit = unit),
@@ -589,16 +669,16 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
             } else {
                 ChoiceRow {
                     name: format!("lens-{index}-on"),
-                    label: "Looks at".to_string(),
-                    description: Some("Where the right-click menu offers it: Lens on Block, Lens on Document, or both. A shortcut shows a lens that looks at a block only over the block the cursor is on.".to_string()),
+                    label: "対象".to_string(),
+                    description: Some("右クリックメニューで、このレンズをブロック・ドキュメントのどちらに表示するかを選びます。".to_string()),
                     options: LensTarget::ALL
                         .into_iter()
                         .map(|on| ChoiceItem {
                             value: on,
                             label: match on {
-                                LensTarget::Either => "Either",
-                                LensTarget::Block => "A block",
-                                LensTarget::Document => "The document",
+                                LensTarget::Either => "両方",
+                                LensTarget::Block => "ブロック",
+                                LensTarget::Document => "ドキュメント",
                             }
                             .to_string(),
                         })
@@ -610,10 +690,10 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
 
             ChoiceRow {
                 name: format!("lens-{index}-agent"),
-                label: "Asks".to_string(),
+                label: "回答する相手".to_string(),
                 description: Some(
                     lens.agent
-                        .map_or("A program of your own, handed the request as JSON.", |agent| agent.profile().description)
+                        .map_or("JSON形式でリクエストを受け取る独自プログラムです。", agent_description)
                         .to_string(),
                 ),
                 options: LensAgent::ALL
@@ -628,8 +708,8 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
 
             if is_command {
                 ArgvField {
-                    label: "Command",
-                    hint: "The program, then each argument on a line of its own. It is run as written, without a shell.",
+                    label: "コマンド",
+                    hint: "プログラムと引数を1行ずつ指定します。シェルを通さず実行します。",
                     value: lens.command.clone(),
                     rows: 3,
                     on_change: move |args: Vec<String>| edit(config, index, |lens| lens.command = args),
@@ -639,12 +719,12 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
                     index,
                     source: ModelSource::of(&lens),
                     key_revision,
-                    hint: if server.is_some() { "Required: the model the server runs." } else { "Left empty, the agent's own default." },
+                    hint: if server.is_some() { "必須です。サーバーが実行するモデルを指定してください。" } else { "空欄ならエージェントの既定値を使います。" },
                     value: lens.model.clone().unwrap_or_default(),
                     on_input: move |text: String| edit(config, index, |lens| lens.model = optional(text)),
                 }
                 TextArea {
-                    label: "Prompt",
+                    label: "プロンプト",
                     hint: prompt_hint(lens.display),
                     value: lens.prompt.clone().unwrap_or_default(),
                     rows: 5,
@@ -654,22 +734,22 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
                 // is sent can be seen rather than taken on trust.
                 details {
                     class: "lens-message",
-                    summary { "What the agent is sent" }
+                    summary { "エージェントに送る内容" }
                     pre { "{message_shape(lens.display, lens.prompt.as_deref())}" }
                 }
             }
 
             if server.is_some() {
                 TextField {
-                    label: "Endpoint",
-                    hint: server.map_or("", |server| server.endpoint_hint),
+                    label: "エンドポイント",
+                    hint: lens.agent.map_or("", endpoint_hint),
                     value: lens.endpoint.clone().unwrap_or_default(),
                     monospace: true,
                     on_input: move |text: String| edit(config, index, |lens| lens.endpoint = optional(text)),
                 }
                 TextArea {
-                    label: "System prompt",
-                    hint: "Sent with every request.",
+                    label: "システムプロンプト",
+                    hint: "すべてのリクエストに送ります。",
                     value: lens.system.clone().unwrap_or_default(),
                     rows: 2,
                     on_input: move |text: String| edit(config, index, |lens| lens.system = optional(text)),
@@ -683,16 +763,16 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
                     },
                 }
                 ArgvField {
-                    label: "API key command",
-                    hint: "Instead of a stored key: a program that prints it — a password manager such as 1Password's op — then each argument on a line of its own. It is run for every request.",
+                    label: "APIキー取得コマンド",
+                    hint: "保存済みのキーの代わりに、キーを出力するプログラムと引数を1行ずつ指定します。リクエストごとに実行されます。",
                     value: lens.api_key_command.clone(),
                     rows: 2,
                     on_change: move |args: Vec<String>| edit(config, index, |lens| lens.api_key_command = args),
                 }
             } else if !is_command {
                 TextField {
-                    label: "Program",
-                    hint: "Where the program is, when it is not found on its own.",
+                    label: "プログラム",
+                    hint: "プログラムを自動で見つけられないときの場所です。",
                     value: lens.program.as_ref().map(|path| path.display().to_string()).unwrap_or_default(),
                     monospace: true,
                     on_input: move |text: String| edit(config, index, |lens| lens.program = optional(text).map(PathBuf::from)),
@@ -701,8 +781,8 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
 
             if server.is_some_and(|server| server.context_length) {
                 NumberField {
-                    label: "Context length",
-                    hint: "In tokens. Left empty, sized to each request.",
+                    label: "コンテキスト長",
+                    hint: "トークン数で指定します。空欄ならリクエストごとに決めます。",
                     value: lens.context_length.map(|length| length.to_string()).unwrap_or_default(),
                     on_input: move |text: String| {
                         let length = text.trim().parse::<u32>().ok();
@@ -717,8 +797,8 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
             for capability in lens.agent.map_or(&[][..], |agent| agent.profile().capabilities).iter().copied() {
                 ToggleRow {
                     key: "{capability}",
-                    label: capability.label().to_string(),
-                    description: Some(capability.description().to_string()),
+                    label: capability_label(capability).to_string(),
+                    description: Some(capability_description(capability).to_string()),
                     checked: lens.allow.contains(&capability),
                     on_change: move |on| edit(config, index, |lens| {
                         lens.allow.retain(|allowed| *allowed != capability);
@@ -732,22 +812,22 @@ fn LensForm(config: Signal<Config>, index: usize, lens: Lens) -> Element {
 
             if lens.display == LensDisplay::Annotate {
                 NumberField {
-                    label: "Context",
-                    hint: format!("Blocks on each side handed over with each block, at most {MAX_LENS_CONTEXT}."),
+                    label: "前後の文脈".to_string(),
+                    hint: format!("各ブロックと一緒に送る前後のブロック数です。最大 {MAX_LENS_CONTEXT}。"),
                     value: lens.context.to_string(),
                     on_input: move |text: String| set_number(config, index, &text, |lens, n| lens.context = n),
                 }
                 NumberField {
-                    label: "Runs at once",
-                    hint: format!("1 to {MAX_LENS_CONCURRENCY}."),
+                    label: "同時実行数",
+                    hint: format!("1〜{MAX_LENS_CONCURRENCY}件を同時に実行します。"),
                     value: lens.concurrency.to_string(),
                     on_input: move |text: String| set_number(config, index, &text, |lens, n| lens.concurrency = n),
                 }
             }
 
             NumberField {
-                label: "Timeout",
-                hint: "Seconds one run may take before it counts as failed.",
+                label: "タイムアウト",
+                hint: "1回の実行を失敗とみなすまでの秒数です。",
                 value: lens.timeout_seconds.to_string(),
                 on_input: move |text: String| set_number(config, index, &text, |lens, n| lens.timeout_seconds = n),
             }
@@ -847,19 +927,19 @@ fn ModelField(
     let (models, status) = match &*offered.read() {
         None => (
             Vec::new(),
-            Some("Asking the agent for its models…".to_string()),
+            Some("エージェントにモデル一覧を問い合わせています…".to_string()),
         ),
         Some(Ok(models)) => (models.clone(), None),
         Some(Err(reason)) => (
             Vec::new(),
-            Some(format!("The models could not be listed: {reason}")),
+            Some(format!("モデル一覧を取得できませんでした: {reason}")),
         ),
     };
 
     rsx! {
         label {
             class: "lens-field",
-            span { class: "lens-field-label", "Model" }
+            span { class: "lens-field-label", "モデル" }
             input {
                 class: "lens-input",
                 r#type: "text",
@@ -950,8 +1030,8 @@ fn ApiKeyField(
         return rsx! {
             div {
                 class: "lens-field",
-                span { class: "lens-field-label", "API key" }
-                span { class: "lens-field-hint", "Set the endpoint first: the key is kept for it." }
+                span { class: "lens-field-label", "APIキー" }
+                span { class: "lens-field-hint", "先にエンドポイントを設定してください。キーはそのエンドポイント用に保存されます。" }
             }
         };
     };
@@ -965,22 +1045,22 @@ fn ApiKeyField(
     rsx! {
         div {
             class: "lens-field",
-            span { class: "lens-field-label", "API key" }
+            span { class: "lens-field-label", "APIキー" }
             if is_stored && !replacing() {
                 div {
                     class: "lens-key-line",
-                    span { class: "lens-key-stored", "A key is stored for {for_account}." }
+                    span { class: "lens-key-stored", "{for_account} 用のキーが保存されています。" }
                     button {
                         class: "lens-button",
                         r#type: "button",
                         onclick: move |_| replacing.set(true),
-                        "Replace"
+                        "置き換える"
                     }
                     button {
                         class: "lens-button lens-button-danger",
                         r#type: "button",
                         onclick: remove,
-                        "Remove"
+                        "削除"
                     }
                 }
             } else if !asking {
@@ -990,7 +1070,7 @@ fn ApiKeyField(
                         class: "lens-input monospace",
                         r#type: "password",
                         autocomplete: "off",
-                        placeholder: "Paste the key",
+                        placeholder: "キーを貼り付け",
                         value: "{draft}",
                         oninput: move |event| draft.set(event.value()),
                     }
@@ -999,7 +1079,7 @@ fn ApiKeyField(
                             class: "lens-button",
                             r#type: "button",
                             onclick: save,
-                            "Save"
+                            "保存"
                         }
                     }
                     if replacing() {
@@ -1010,7 +1090,7 @@ fn ApiKeyField(
                                 draft.set(String::new());
                                 replacing.set(false);
                             },
-                            "Cancel"
+                            "キャンセル"
                         }
                     }
                 }
@@ -1018,9 +1098,9 @@ fn ApiKeyField(
             span {
                 class: "lens-field-hint",
                 if overridden {
-                    "Not used while an API key command is set below."
+                    "下のAPIキー取得コマンドが設定されている間は使いません。"
                 } else {
-                    "Kept in the system's credential store — the Keychain on macOS — under the endpoint, never in config.json, and used by every lens that asks the same server. A server that wants no key, such as a local Ollama, needs none."
+                    "キーはconfig.jsonではなく、macOSではキーチェーンなどのシステム認証情報ストアにエンドポイントごとに保存されます。同じサーバーを使うすべてのレンズで共有されます。ローカルのOllamaなどキーを必要としないサーバーには不要です。"
                 }
             }
             if let Some(reason) = failure().or(read_error) {

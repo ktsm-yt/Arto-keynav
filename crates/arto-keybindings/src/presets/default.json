@@ -166,6 +166,22 @@
   ],
   "content": [
     {
+      "key": "ArrowLeft",
+      "action": "cursor.collapse"
+    },
+    {
+      "key": "ArrowRight",
+      "action": "cursor.open"
+    },
+    {
+      "key": "ArrowDown",
+      "action": "file.next"
+    },
+    {
+      "key": "ArrowUp",
+      "action": "file.previous"
+    },
+    {
       "key": "Cmd+Shift+h",
       "action": "highlight.add"
     },
@@ -221,7 +237,7 @@
     },
     {
       "key": "Enter",
-      "action": "cursor.enter"
+      "action": "cursor.open"
     },
     {
       "key": "ArrowLeft",

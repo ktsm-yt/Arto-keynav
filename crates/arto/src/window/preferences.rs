@@ -67,7 +67,7 @@ pub fn open_or_focus_preferences_window(snapshot: PreferencesSnapshot, theme: Th
             .with_menu(None)
             .with_window(super::icon::apply_app_icon(
                 WindowBuilder::new()
-                    .with_title("Preferences")
+                    .with_title("設定")
                     .with_inner_size(LogicalSize::new(PREFERENCES_WIDTH, PREFERENCES_HEIGHT))
                     .with_min_inner_size(LogicalSize::new(
                         PREFERENCES_MIN_WIDTH,

@@ -59,14 +59,14 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
         div {
             class: "preferences-pane",
 
-            h3 { class: "preference-section-title", "Size" }
+            h3 { class: "preference-section-title", "サイズ" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Default Size" }
-                    p { class: "preference-description", "How large a window opens. Percent values are relative to the current screen." }
+                    label { "既定のサイズ" }
+                    p { class: "preference-description", "ウィンドウを開くときのサイズです。百分率は現在の画面サイズを基準にします。" }
                 }
                 div {
                     class: "dimension-row",
@@ -74,7 +74,7 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                         class: "dimension-grid",
                         div {
                             class: "dimension-field",
-                            label { "Width" }
+                            label { "幅" }
                             DimensionInput {
                                 value: size_cfg.default_size.width,
                                 min: 0.0,
@@ -88,7 +88,7 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                         }
                         div {
                             class: "dimension-field",
-                            label { "Height" }
+                            label { "高さ" }
                             DimensionInput {
                                 value: size_cfg.default_size.height,
                                 min: 0.0,
@@ -104,19 +104,19 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                     button {
                         class: "use-current-button",
                         onclick: use_current_size,
-                        "Use Current"
+                        "現在のサイズを使う"
                     }
                 }
             }
 
-            h3 { class: "preference-section-title", "Position" }
+            h3 { class: "preference-section-title", "位置" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Default Position" }
-                    p { class: "preference-description", "Where a window lands. Percent values place it within the available screen area (0% = top/left, 100% = bottom/right)." }
+                    label { "既定の位置" }
+                    p { class: "preference-description", "ウィンドウを開く位置です。百分率は利用可能な画面範囲を基準にします。" }
                 }
                 OptionCards {
                     name: "window-position-mode".to_string(),
@@ -124,14 +124,14 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                         OptionCardItem {
                             value: WindowPositionMode::Coordinates,
                             icon: Some(IconName::Command),
-                            title: "Coordinates".to_string(),
-                            description: Some("Use the X/Y values below".to_string()),
+                            title: "座標指定".to_string(),
+                            description: Some("下のX/Y値を使います".to_string()),
                         },
                         OptionCardItem {
                             value: WindowPositionMode::Mouse,
                             icon: Some(IconName::Click),
-                            title: "Mouse Position".to_string(),
-                            description: Some("Open at the current mouse location".to_string()),
+                            title: "マウス位置".to_string(),
+                            description: Some("現在のマウス位置に開きます".to_string()),
                         },
                     ],
                     selected: position_cfg.default_position_mode,
@@ -176,7 +176,7 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                     button {
                         class: "use-current-button",
                         onclick: use_current_position,
-                        "Use Current"
+                        "現在の位置を使う"
                     }
                 }
             }
@@ -185,8 +185,8 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Position Offset" }
-                    p { class: "preference-description", "If another window already uses a nearby position, shift the new window by this offset (pixels only)." }
+                    label { "位置のずらし量" }
+                    p { class: "preference-description", "近い位置に別のウィンドウがあるとき、新しいウィンドウをこの量だけずらします。" }
                 }
                 div {
                     class: "dimension-grid",
@@ -249,16 +249,16 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                 }
             }
 
-            h3 { class: "preference-section-title", "Opening" }
+            h3 { class: "preference-section-title", "開くとき" }
 
             div {
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Where a File Opens" }
+                    label { "ファイルを開く場所" }
                     p {
                         class: "preference-description",
-                        "Which window receives a file or folder opened from Finder, the command line, or another instance of Arto."
+                        "Finder、コマンドライン、別のArtoから開いたファイルやフォルダを表示するウィンドウを選びます。"
                     }
                 }
                 OptionCards {
@@ -267,20 +267,20 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                         OptionCardItem {
                             icon: None,
                             value: FileOpenBehavior::NewWindow,
-                            title: "New Window".to_string(),
-                            description: Some("Always create a new window".to_string()),
+                            title: "新しいウィンドウ".to_string(),
+                            description: Some("常に新しいウィンドウで開きます".to_string()),
                         },
                         OptionCardItem {
                             icon: None,
                             value: FileOpenBehavior::LastFocused,
-                            title: "Last Focused".to_string(),
-                            description: Some("Open in the last focused visible window".to_string()),
+                            title: "最後に操作したウィンドウ".to_string(),
+                            description: Some("最後に操作した表示中のウィンドウで開きます".to_string()),
                         },
                         OptionCardItem {
                             icon: None,
                             value: FileOpenBehavior::CurrentScreen,
-                            title: "Current Screen".to_string(),
-                            description: Some("Open in a visible window on the cursor screen".to_string()),
+                            title: "現在の画面".to_string(),
+                            description: Some("カーソルがある画面の表示中ウィンドウで開きます".to_string()),
                         },
                     ],
                     selected: file_open,
@@ -295,15 +295,15 @@ pub fn WindowTab(config: Signal<Config>, current_directory: Option<PathBuf>) -> 
                 class: "preference-item",
                 div {
                     class: "preference-item-header",
-                    label { "Folder to Start In" }
+                    label { "起動時のフォルダ" }
                     p {
                         class: "preference-description",
-                        "The folder the first window works in, beside the places you keep. Leave it empty to start with the places alone."
+                        "最初のウィンドウで開くフォルダです。空欄なら登録した場所だけで開始します。"
                     }
                 }
                 DirectoryPicker {
                     value: default_directory,
-                    placeholder: "No folder — the places alone".to_string(),
+                    placeholder: "フォルダなし — 登録した場所だけで開始".to_string(),
                     current_directory: current_directory.clone(),
                     on_change: move |new_directory| {
                         config.write().directory.default_directory = new_directory;

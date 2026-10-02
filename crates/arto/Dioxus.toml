@@ -1,10 +1,10 @@
 [application]
-name = "Arto"
+name = "Arto Keynav"
 default_platform = "desktop"
 
 [bundle]
-identifier = "com.lambdalisue.Arto"
-publisher = "lambdalisue"
+identifier = "io.github.ktsm-yt.artokeynav"
+publisher = "ktsm-yt"
 # One artwork per platform's format: the .icns goes into the macOS bundle, the
 # .png into the Linux packages, and the .ico is linked into arto.exe as its
 # icon resource — the icon Explorer draws on the executable, on the Start menu
@@ -20,9 +20,9 @@ icon = [
 ]
 copyright = "Copyright 2025 lambdalisue"
 category = "Utility"
-short_description = "A GitHub Markdown viewer"
+short_description = "A Markdown viewer with keyboard file navigation"
 long_description = """
-Arto is a GitHub Markdown viewer built with Dioxus.
+Arto Keynav is an unofficial fork of Arto with keyboard file navigation.
 """
 
 # Every shared library the binary links directly (the DT_NEEDED entries, minus
@@ -76,7 +76,7 @@ silent = false
 
 [bundle.macos]
 license = "../../LICENSE"
-provider_short_name = "Alisue"
+provider_short_name = "ktsm-yt"
 info_plist_path = "../../platform/macos/bundle/Info.plist"
 files = {}
 hardened_runtime = false # because we don't have a proper Apple Developer ID

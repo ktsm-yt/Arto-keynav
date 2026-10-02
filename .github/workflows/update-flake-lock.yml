@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   update-flake-lock:
+    if: github.repository == 'arto-app/Arto'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v7

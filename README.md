@@ -1,138 +1,74 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/arto-header-readme-dark.png">
-    <img alt="Arto" src="docs/images/arto-header-readme-light.png" width="600">
-  </picture>
-</p>
+<!-- 読者: Markdownを読むmacOSユーザー。説明なしで使ってよい語: Markdown、macOS、GitHub、README、アプリ、フォルダ、キー、設定、ダウンロード、DMG、Apple Silicon、Intel、Windows、Linux、Terminal、APIキー、MIT。 -->
+# Arto Keynav
 
-<p align="center">
-  <strong>Arto — the Art of Reading Markdown.</strong><br>
-  A desktop app that renders Markdown the way GitHub does, locally and offline.
-</p>
+Arto Keynavは、[Arto](https://github.com/arto-app/Arto)をもとに独自に変更したアプリです。上下キーでMarkdownファイルを切り替えられます。
+本家Artoの作者はAlisueさんです。この版の変更・配布は[ktsm-yt](https://github.com/ktsm-yt)が管理しています。
 
-<p align="center">
-  <a href="https://arto-app.github.io"><strong>Website</strong></a> ·
-  <a href="./docs/installation.md">Install</a> ·
-  <a href="./docs/cli.md">CLI</a> ·
-  <a href="./docs/configuration.md">Configuration</a> ·
-  <a href="./docs/keybindings.md">Keybindings</a> ·
-  <a href="./CONTRIBUTING.md">Contributing</a>
-</p>
+## 本家との違い
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/hero-dark.webp">
-    <img src="./docs/images/hero-light.webp" alt="Arto showing a rendered document, with the contents gutter standing in its right-hand margin" width="860">
-  </picture>
-</p>
+- 本文を読んでいるとき、↑↓キーで開いたフォルダ内のMarkdownファイルを順に開きます。
+- ←キーで親フォルダへ戻り、→キーで選んだフォルダやファイルを開きます。
+- 設定画面の表示を日本語にしています。
+- 左側のファイル一覧の拡大率に合わせて、左上のアイコンも拡大します。
+- 本家とは設定・履歴・一時データ・APIキーの保存先を分けています。
 
-> [!WARNING]
-> Arto is **beta**. Features may change without regard to backward compatibility. macOS is the platform it is developed and tested on; Linux and Windows builds exist but are **experimental** — see [Platform support](./docs/installation.md#platform-support).
+## macOS試用版を入れる
 
-## Why
+対象はApple SiliconのmacOSです。Intel、Windows、Linux向けの配布はまだ行いません。
 
-Most Markdown tools are built for *writing*. Arto is built for **reading**: the name is short for "Art of Reading".
+1. [ダウンロードページ](https://github.com/ktsm-yt/Arto-keynav/releases)から、末尾が`aarch64.dmg`のファイルを入手します。
+2. DMGを開き、`Arto Keynav.app`をApplicationsフォルダへコピーします。
+3. Markdownファイルやフォルダを、アプリのウィンドウへドラッグします。
 
-Markdown is where documentation, communication and thinking now live, and reading it deserves more than a preview pane. Arto reproduces GitHub's rendering locally and offline, with typography and whitespace chosen for long reading rather than for editing.
+この試用版はAppleの配布前チェックを受けていません。macOSが起動を止めた場合は、配布元を確認したうえで、システム設定の『プライバシーとセキュリティ』から、このアプリの起動を許可してください。
+パソコン全体の保護設定を無効にする必要はありません。
 
-## Features
-
-**Reading** — GitHub's dialect drawn with GitHub's own stylesheet: headings, tables, task lists, footnotes, autolinks and heading slugs; the five alerts (`NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`); code highlighted per language with a copy button; and YAML frontmatter as a table that arrives collapsed, so the document still begins with its title. A file that changes on disk re-renders in place, and the renderer needs nothing from the network — the stylesheet, the highlighter and the diagram and formula code are compiled into the binary, so the only thing ever fetched is an image the document itself names by URL.
-
-**What the renderer reads** — Markdown is a family of dialects, so the extensions are switches rather than assumptions: math, wiki links, superscript and subscript, definition lists, heading attributes and permalinks, smart punctuation, CJK emphasis, bare URLs as links, and whether raw HTML is filtered, passed through, or escaped so the markup itself shows.
-
-**Getting around** — one panel with three faces rather than three panels: a file explorer holding as many folders as you need, the documents you have read grouped by day, and the ones you have starred (`⌘1`, `⌘2`, `⌘3`, and `⌘B` to show the panel at all). Unpinned it comes over the page on hover and leaves again; pinned it takes its own width beside the document. A window with nothing open shows the same three things on its welcome page.
-
-**The gutter** — a ruler stands in the page's own margin and marks every heading: its width is the heading's depth, its colour a pinned search, its thickness where you are. `⌘J` opens it into a list of headings you can walk with the arrow keys. Relative links open the document they name, `⌘[` and `⌘]` move back and forward across the trail, and reopening a document puts you back where you stopped reading.
-
-**Finding** — `⌘K` fuzzy-matches one query the way `fzf` does, across the files under the folder you are in, what you have read, what you have kept, and every command by name — a command showing the keystroke that runs it, where one is bound. `⌘F` puts find in the row the document's name is in, so nothing moves and nothing is covered; `Return` keeps what you typed as a mark in a colour of its own, repeated in the gutter, applied in every window it matches and kept across sessions.
-
-**Windows** — one document to a window, named in its title; hand Arto several files and each gets a window of its own. A link inside a document travels in the window you are already in, unless you middle-click it. A diagram, a formula or an image lifts into a viewer of its own — zoom, pan, fit and copy-as-image, with the formula and the image naming their source in the header. Files dragged onto Arto open, including ones dragged out of an editor, and preferences decide whether a new window reuses the last focused one, appears on the screen the cursor is on, or is always new.
-
-**Rich content** — Mermaid diagrams and KaTeX math where they stand, drawn as they come into view so a long document opens as quickly as a short one. The context menu copies a selection as Markdown, a code block with or without its fence, a table as Markdown, CSV or TSV, and an image as Markdown or as the image itself — as well as the document's path, with the line you are on or a range of them.
-
-**Lenses** — Claude, Codex, a local model through Ollama or any OpenAI-compatible server asked about the document you are reading, the file itself never changed: a translation taking the document's places block by block from the top, each original a point at its right margin away; a summary opened from the header; a note kept beside each paragraph. Nothing is sent anywhere until you open a lens, and then only to what you configured — see [Lenses](./docs/lenses.md).
-
-**Fitting in** — GitHub's own themes, including dimmed, high contrast and the colour-vision ones, with a separate choice for light and dark mode and the system deciding which applies. Keybindings ship as Default, Vim, Emacs and Clear presets, every binding editable and chord sequences supported. Zoom by keyboard or trackpad with the level remembered, `⌘P` to print or save a PDF through a stylesheet made for paper, and — on macOS — `Space` on a Markdown file previews it rendered, in the Finder preview pane too.
-
-<sub>Shortcuts above are the macOS defaults; `⌘` is `Ctrl` on Linux and Windows. All of them are rebindable — see [Keybindings](./docs/keybindings.md).</sub>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/gfm-dark.webp">
-    <img src="./docs/images/gfm-light.webp" alt="Emphasis, strikethrough, inline code, links, nested and task lists, and a blockquote rendered in Arto" width="410">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/contents-dark.webp">
-    <img src="./docs/images/contents-light.webp" alt="The gutter opened into a list of the document's headings, beside typeset math" width="410">
-  </picture>
-  <br>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/palette-dark.webp">
-    <img src="./docs/images/palette-light.webp" alt="The command palette, one query matching commands and documents at once" width="410">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/diagrams-dark.webp">
-    <img src="./docs/images/diagrams-light.webp" alt="A Mermaid sequence diagram drawn inline in a document" width="410">
-  </picture>
-</p>
-
-<p align="center"><em>See it in motion: <a href="https://arto-app.github.io">arto-app.github.io</a></em></p>
-
-## Install
+ダウンロードしたDMGを確認するため、同じページに`SHA256SUMS`を載せます。両方をダウンロードフォルダに保存し、Terminalで次を実行します。
 
 ```sh
-brew install --cask arto-app/tap/arto
-xattr -dr com.apple.quarantine /Applications/Arto.app
+cd ~/Downloads
+shasum -a 256 -c SHA256SUMS
 ```
 
-Linux packages, a single binary for Linux and Windows, Nix, and why that second line is needed: [Installation](./docs/installation.md).
+DMGの名前の横に`OK`と出れば、確認できています。
 
-## From the terminal
+## 本家と一緒に使う
 
-Arto is a GUI application, and it runs as a single instance: the `arto` command hands files to the process already running rather than starting a second one.
+本家の`Arto.app`を置き換えずにインストールできます。
+設定・履歴などは`~/Library/Application Support/arto-keynav/`に保存します。本家の設定を自動ではコピーしません。
+APIキーも、この版であらためて登録してください。
+
+Finderでスペースキーを押して表示するプレビュー機能は、この版には同梱しません。本家をインストール済みなら、本家のプレビューを利用できます。
+Terminalから使う場合は、次のコマンドでMarkdownファイルを開きます。
 
 ```sh
-arto README.md
+"/Applications/Arto Keynav.app/Contents/MacOS/arto" README.md
 ```
 
-It also renders a Markdown file to a self-contained HTML page — stylesheet, diagrams and math inlined — that opens in any browser without the app:
+## 不具合を報告する
+
+[この版のIssues](https://github.com/ktsm-yt/Arto-keynav/issues)へ、macOSのバージョン、再現手順、使ったキーを書いてください。
+共有できる短いMarkdownがあると確認しやすくなります。APIキーや非公開の文章は載せないでください。
+本家への報告は、本家でも同じ問題が起きると確認できた場合にお願いします。
+
+## ソースからビルドする
+
+Rust、Dioxus CLI、Node.js、pnpm、just、Xcode Command Line Toolsを使います。[開発環境の説明](CONTRIBUTING.md)も参照してください。
+macOSの配布物は、Nixの開発環境を使わず、macOS標準のライブラリでビルドします。
 
 ```sh
-arto page README.md > README.html
+just fmt check test
+just build
+just verify-bundle
 ```
 
-The page follows your configuration, and ships with a Content-Security-Policy that blocks any script embedded in the Markdown. The same renderer is available as a standalone `arto-page` binary, for machines that need the output but not the window.
+DMGは`target/dx/arto/bundle/macos/macos/`にできます。DMG内のアプリ名は`Arto Keynav.app`です。
+ビルド時にアプリは起動しません。
 
-Full flags and behaviour: [CLI usage](./docs/cli.md).
+## ライセンスと出典
 
-## Built with
+本家の著作権表示と[MITライセンス](LICENSE)を保持しています。配布アプリ内にもLICENSEと[依存ライブラリのライセンス表示](THIRD-PARTY-NOTICES.txt)を同梱します。
+本家のリポジトリ: [arto-app/Arto](https://github.com/arto-app/Arto)
 
-- **[Dioxus]** — the Rust UI framework the whole application is written in. Native windows, menus and state, no Electron.
-- **[ox-content]** — the Markdown engine. It renders GitHub's dialect, including autolinks, alerts, heading slugs and the tag filter, so Arto does not carry its own version of any of them.
-- **[KaTeX]** and **[Mermaid]** for math and diagrams, drawn in the page as you reach them.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines.
-
-## Sponsors
-
-<p align="center">
-  <a href="https://blacksmith.sh/">
-    <img src="./docs/images/blacksmith-powered.jpg" alt="CI powered by Blacksmith" width="368">
-  </a>
-</p>
-
-Arto's CI and release builds run on runners provided by **[Blacksmith]** through
-their open source program.
-
-## License
-
-See [LICENSE](./LICENSE).
-
-[Blacksmith]: https://blacksmith.sh/
-[Dioxus]: https://dioxuslabs.com/
-[ox-content]: https://github.com/ubugeeei-prod/ox-content
-[KaTeX]: https://katex.org/
-[Mermaid]: https://mermaid.js.org/
+本家には、GitHub風のMarkdown表示、図や数式の表示、色の変更、検索などの機能があります。
+この版はその実装を利用し、ファイルのキー操作と設定画面を変更しています。

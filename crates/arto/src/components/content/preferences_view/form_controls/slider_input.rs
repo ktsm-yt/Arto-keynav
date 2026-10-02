@@ -93,13 +93,13 @@ pub fn SliderInput(
                 button {
                     class: "use-current-button",
                     onclick: move |_| on_change.call(current),
-                    "Use Current"
+                    "現在の値を使う"
                 }
             } else if let Some(default) = default_value {
                 button {
                     class: "use-current-button",
                     onclick: move |_| on_change.call(default),
-                    "Use Default"
+                    "既定値を使う"
                 }
             }
         }

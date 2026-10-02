@@ -8,7 +8,7 @@ pub fn build_custom_index(theme: Theme) -> String {
     <!DOCTYPE html>
     <html data-theme="{resolved}">
         <head>
-            <title>Arto</title>
+            <title>Arto Keynav</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <!-- CUSTOM HEAD -->
         </head>
@@ -28,7 +28,8 @@ fn build_viewer_window_index(title: &str, body_class: &str, theme: Theme) -> Str
     <!DOCTYPE html>
     <html data-theme="{resolved}">
         <head>
-            <title>{title} - Arto</title>
+            <meta charset="utf-8">
+            <title>{title} - Arto Keynav</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <!-- CUSTOM HEAD -->
         </head>
@@ -54,7 +55,7 @@ pub(crate) fn build_image_window_index(theme: Theme) -> String {
 }
 
 pub(crate) fn build_preferences_window_index(theme: Theme) -> String {
-    build_viewer_window_index("Preferences", "preferences-window-body", theme)
+    build_viewer_window_index("設定", "preferences-window-body", theme)
 }
 
 #[cfg(test)]
